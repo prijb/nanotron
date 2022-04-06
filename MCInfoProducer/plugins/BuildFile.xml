@@ -1,0 +1,27 @@
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="SimGeneral/HepPDTRecord"/>
+<use   name="SimDataFormats/GeneratorProducts"/>
+<use   name="GeneratorInterface/Core"/>
+<use   name="DataFormats/Common"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/Candidate"/>
+<use   name="DataFormats/HepMCCandidate"/>
+<use   name="nanotron/DataFormats"/>
+<use   name="PhysicsTools/UtilAlgos"/>
+
+<!--
+<library file="DisplacedGenVertexProducer.cc" name="DisplacedGenVertexProducerPlugin">
+  <flags EDM_PLUGIN="1"/>
+</library>
+!-->
+
+<library file="MCGenDecayInfoProducer.cc" name="MCGenDecayInfoProducerPlugin">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="MCGhostFlavourProducer.cc" name="MCGhostFlavourProducerPlugin">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="MCLabelProducer.cc" name="MCLabelProducerPlugin">
+  <flags EDM_PLUGIN="1"/>
+</library>

@@ -1,0 +1,58 @@
+<lcgdict>
+    <class name="nanotron::ShallowTagInfoFeatures"/>
+    <class name="nanotron::JetFeatures"/>
+    <class name="nanotron::SecondaryVertexFeatures"/>
+    <class name="nanotron::ChargedCandidateFeatures"/>
+    <class name="nanotron::NeutralCandidateFeatures"/>
+    <class name="nanotron::OnionTagFeatures"/>
+    
+    <class name="reco::OnionTagInfo"/>
+    <class name="reco::FeaturesTagInfo<nanotron::OnionTagFeatures>"/>
+    <class name="reco::OnionTagInfoCollection"/>
+    <class name="reco::OnionTagInfoRef"/>
+    
+    <class name="edm::Wrapper<reco::FeaturesTagInfo<nanotron:OnionTagFeatures>>"/>
+    <class name="edm::Wrapper<std::vector<reco::FeaturesTagInfo<nanotron::OnionTagFeatures>>>"/>
+    <class name="std::vector<reco::FeaturesTagInfo<nanotron::OnionTagFeatures>>"/>
+    
+    <class name="edm::reftobase::Holder<reco::BaseTagInfo, reco::OnionTagInfoRef>"/>
+    <class name="edm::reftobase::RefHolder<reco::OnionTagInfoRef>"/>
+    
+    <class name="nanotron::DisplacedGenVertex"/>
+    <class name="std::vector<nanotron::DisplacedGenVertex>"/>
+    
+    <class name="edm::Wrapper<std::vector<nanotron::DisplacedGenVertex>>"/>
+    <class name="edm::Ref<std::vector<nanotron::DisplacedGenVertex>>"/>
+    <class name="edm::Wrapper<edm::Ref<std::vector<nanotron::DisplacedGenVertex>>>"/>
+    <class name="edm::RefVector<std::vector<nanotron::DisplacedGenVertex>>"/>
+    <class name="edm::Wrapper<edm::RefVector<std::vector<nanotron::DisplacedGenVertex>>>"/>
+    
+    <class name="edm::Ptr<nanotron::DisplacedGenVertex>"/>
+    <class name="edm::Wrapper<edm::Ptr<nanotron::DisplacedGenVertex>>"/>
+        
+    <class name="edm::Ptr<std::vector<nanotron::DisplacedGenVertex>>"/>
+    <class name="edm::Wrapper<edm::Ptr<std::vector<nanotron::DisplacedGenVertex>>>"/>
+    <class name="edm::PtrVector<nanotron::DisplacedGenVertex>"/>
+    <class name="edm::Wrapper<edm::PtrVector<nanotron::DisplacedGenVertex>>"/>
+    
+    <class name="edm::PtrVector<reco::GenParticle>"/>
+    <class name="edm::Wrapper<edm::PtrVector<reco::GenParticle>>"/>
+    
+    
+    <class name="nanotron::MCLabel"/>
+    <class name="reco::FeaturesTagInfo<nanotron::MCLabel>"/>
+    <class name="std::vector<reco::FeaturesTagInfo<nanotron::MCLabel>>"/>
+    <class name="edm::Wrapper<std::vector<reco::FeaturesTagInfo<nanotron::MCLabel>>>"/>
+        
+    <class name="nanotron::MCGenDecayInfo"/>
+    <class name="std::vector<nanotron::MCGenDecayInfo>"/>
+    <class name="edm::Wrapper<std::vector<nanotron::MCGenDecayInfo>>"/>
+    
+    <class name="nanotron::MCGhostFlavourInfo"/>
+    <class name="std::vector<nanotron::MCGhostFlavourInfo>"/>
+    <class name="edm::Wrapper<std::vector<nanotron::MCGhostFlavourInfo>>"/>
+    <class name="edm::ValueMap<nanotron::MCGhostFlavourInfo>"/>
+    <class name="edm::Wrapper<edm::ValueMap<nanotron::MCGhostFlavourInfo>>"/>
+
+
+</lcgdict>
