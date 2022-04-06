@@ -2,6 +2,10 @@
 
 ![build tests](https://travis-ci.org/mieskolainen/nanotron.svg?branch=master)
 
+Version 0.01
+Hard fork based on https://github.com/LLPDNNX/LLPReco
+
+
 Initialize the environment
 ```
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -35,9 +39,6 @@ Test the custom NanoAOD tree
 ```
 python nanotron/test/check_tree.py
 ```
-
-Hard fork based on https://github.com/LLPDNNX/LLPReco
-
 
 
 m.mieskolainen@imperial.ac.uk, 2022
