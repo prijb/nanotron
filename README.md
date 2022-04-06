@@ -36,7 +36,7 @@ Test the custom NanoAOD tree
 python nanotron/test/check_tree.py
 ```
 
-Code based on https://github.com/LLPDNNX/LLPReco
+Code fork based on https://github.com/LLPDNNX/LLPReco
 
 
 
