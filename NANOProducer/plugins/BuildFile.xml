@@ -2,19 +2,57 @@
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/ServiceRegistry"/>
+<use name="FWCore/Common"/>
+<use name="FWCore/Utilities"/>
+<use name="FWCore/MessageLogger"/>
 
 <use name="SimGeneral/HepPDTRecord"/>
 <use name="SimDataFormats/GeneratorProducts"/>
+
 <use name="GeneratorInterface/Core"/>
 
 <use name="DataFormats/NanoAOD"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/Candidate"/>
+<use name="DataFormats/HLTReco"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/HepMCCandidate"/>
+<use name="DataFormats/Provenance"/>
+<use name="DataFormats/L1TGlobal"/>
+<use name="DataFormats/EgammaCandidates"/>
+<use name="DataFormats/BeamSpot"/>
+
+<use name="CommonTools/Utils"/>
+<use name="CommonTools/CandAlgos"/>
+<use name="CommonTools/Statistics"/>
+
+<use name="HLTrigger/HLTcore"/>
+
+<use name="PhysicsTools/TensorFlow"/>
+
+<use name="RecoEgamma/EgammaTools"/>
+<use name="PhysicsTools/JetMCUtils"/>
+<use name="roothistmatrix"/>
+
+<use name="RecoVertex/VertexTools"/>
+<use name="RecoVertex/VertexPrimitives"/>
+
+<use name="IOPool/Provenance"/>
+<use name="DQMServices/Core"/>
+
+<use name="CondFormats/BTauObjects"/>
+<use name="CondFormats/DataRecord"/>
+<use name="CondFormats/L1TObjects"/>
+<use name="CondTools/BTau"/>
+
+<use name="RecoVertex/KinematicFitPrimitives"/>
+<use name="RecoVertex/KinematicFit"/>
+<use name="MagneticField/Records"/>
+<use name="TrackingTools/Records"/>
+<use name="TrackingTools/IPTools"/>
+<use name="TrackingTools/GsfTracking"/>
 
 <use name="nanotron/DataFormats"/>
-
 
 <use name="xerces-c"/>
 
@@ -33,3 +71,22 @@
 <library file="NANOGenProducer.cc" name="NANOGenProducerPlugin">
     <flags EDM_PLUGIN="1"/>
 </library>
+
+
+<library file="MuonTriggerSelector.cc" name="MuonTriggerSelectorPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
+<library file="CandMCMatchTableProducerBPark.cc" name="CandMCMatchTableProducerBParkPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
+<library file="MatchEmbedder.cc" name="MuonMatchEmbedderPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
+<!--flags CXXFLAGS="-g"
+<library   file="*.cc" name="PhysicsToolsBParkingNanoPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>
+/-->

@@ -742,7 +742,7 @@ bool OnionInfoProducer::push_ElectronData(std::size_t k, nanotron::OnionTagFeatu
         elec_features.dr04HcalDepth1TowerSumEtBc = electron.dr04HcalDepth1TowerSumEtBc()/electron.pt(); 
         elec_features.dr04HcalDepth2TowerSumEt   = electron.dr04HcalDepth2TowerSumEt()/electron.pt(); 
         elec_features.dr04HcalDepth2TowerSumEtBc = electron.dr04HcalDepth2TowerSumEtBc()/electron.pt();
-
+        
         elec_features.dr04HcalTowerSumEt = electron.dr04HcalTowerSumEt()/electron.pt();
         elec_features.dr04HcalTowerSumEtBc = electron.dr04HcalTowerSumEtBc()/electron.pt();
 

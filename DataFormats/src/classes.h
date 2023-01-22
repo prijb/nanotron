@@ -4,6 +4,7 @@
 //
 
 #include "DataFormats/Common/interface/Wrapper.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
 #include "nanotron/DataFormats/interface/OnionTagFeatures.h"
 #include "nanotron/DataFormats/interface/OnionTagInfo.h"
@@ -63,8 +64,12 @@ namespace {
         edm::ValueMap<nanotron::MCGhostFlavourInfo> dummy29;
         edm::Wrapper<edm::ValueMap<nanotron::MCGhostFlavourInfo>> dummy30;
         */
-
+        
         nanotron::ElectronCandidateFeatures dummy19;
         nanotron::MuonCandidateFeatures dummy20;
+        
+        std::vector<reco::TransientTrack> dummy21;
+        edm::Wrapper<std::vector<reco::TransientTrack> > dummy22;
+
     };
 }

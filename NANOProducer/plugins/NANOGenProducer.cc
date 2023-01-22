@@ -33,10 +33,11 @@
 
 #define LABEL(name) \
     std::pair<std::string, nanotron::MCLabel::Type>( #name , nanotron::MCLabel::Type:: name ) 
-    
-//#define TAUDECAY(name) \
-//    std::pair<std::string, nanotron::MCLabel::TauDecay>( #name , nanotron::MCLabel::TauDecay:: name ) 
 
+/*  
+#define TAUDECAY(name) \
+    std::pair<std::string, nanotron::MCLabel::TauDecay>( #name , nanotron::MCLabel::TauDecay:: name ) 
+*/
 
 class NANOGenProducer : public edm::stream::EDProducer<> {
    public:

@@ -2,9 +2,11 @@
 
 ![build tests](https://travis-ci.org/mieskolainen/nanotron.svg?branch=master)
 
-Version 0.01
+Version 0.02
 
-Hard fork based on https://github.com/LLPDNNX/LLPReco
+Based on a fusion of code from:
+https://github.com/LLPDNNX/LLPReco
+https://github.com/DiElectronX/BParkingNANO
 
 </br>
 
@@ -13,11 +15,19 @@ Initialize the environment
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 ```
 
+Initialize CMSSW
+
+```
+scram list CMSSW
+
+cmsrel CMSSW_10_6_31
+cd CMSSW_10_6_31/src
+
+cmsenv
+```
+
 Pull the repo
 ```
-cmsrel CMSSW_10_2_22
-cd CMSSW_10_2_22/src
-cmsenv
 git clone git@github.com:mieskolainen/nanotron.git nanotron
 ```
 
@@ -43,4 +53,4 @@ python nanotron/test/check_tree.py
 ```
 
 
-m.mieskolainen@imperial.ac.uk, 2022
+m.mieskolainen@imperial.ac.uk, 2023
