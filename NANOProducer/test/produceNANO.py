@@ -605,7 +605,6 @@ if options.isData:
     )
 
     # B-parking additions
-    process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables
     process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
 
 
@@ -629,7 +628,6 @@ else:
     )
 
     # B-parking additions
-    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables
     process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
     process.llpnanoAOD_step += process.muonBParkMC
     
