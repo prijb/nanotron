@@ -537,15 +537,12 @@ process.muonTriggerMatchedTable = process.muonBParkTable.clone(
     variables = cms.PSet(CandVars,
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6)####################,
+        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
         ptErr   = Var("bestTrack().ptError()", float, doc = "ptError of the muon track", precision=6),
         dz = Var("dB('PVDZ')",float,doc="dz (with sign) wrt first PV, in cm",precision=10),
         dzErr = Var("abs(edB('PVDZ'))",float,doc="dz uncertainty, in cm",precision=6),
         dxy = Var("dB('PV2D')",float,doc="dxy (with sign) wrt first PV, in cm",precision=10),
         dxyErr = Var("edB('PV2D')",float,doc="dxy uncertainty, in cm",precision=6),
-        vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
-        vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
         ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
         sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV",precision=10)
 #        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
@@ -578,6 +575,11 @@ process.muonBParkMC       = cms.Sequence(process.muonBParkSequence)
 process.muonBParkTables   = cms.Sequence(process.muonBParkTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
 process.triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + process.triggerObjectBParkTable )
+
+#from PhysicsTools.NanoAOD.common_cff import *
+#from PhysicsTools.NanoAOD.globals_cff import *
+#from PhysicsTools.NanoAOD.nano_cff import *
+#process.metadata = cms.Sequence(nanoMetadata)
 # ------------------------------------------------------------------------
 
 # ========================================================================
@@ -606,7 +608,7 @@ if options.isData:
 
     # B-parking additions
     process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
-
+    #process.llpnanoAOD_step_mu += process.metadata
 
 # ========================================================================
 # ** MC SEQUENCE **
