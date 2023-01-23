@@ -85,6 +85,10 @@
     <flags EDM_PLUGIN="1"/>
 </library>
 
+<library file="TriggerObjectTableBParkProducer.cc" name="TriggerObjectTableBParkProducerPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
 <!--flags CXXFLAGS="-g"
 <library   file="*.cc" name="PhysicsToolsBParkingNanoPlugins">
   <flags   EDM_PLUGIN="1"/>

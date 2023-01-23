@@ -413,6 +413,7 @@ else:
 # https://github.com/DiElectronX/BParkingNANO/blob/main/BParkingNano/python/muonsBPark_cff.py
 
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
+#Path=["HLT_Mu9_IP6"]
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                 muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
@@ -537,9 +538,38 @@ process.muonTriggerMatchedTable = process.muonBParkTable.clone(
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6)####################,
+        ptErr   = Var("bestTrack().ptError()", float, doc = "ptError of the muon track", precision=6),
+        dz = Var("dB('PVDZ')",float,doc="dz (with sign) wrt first PV, in cm",precision=10),
+        dzErr = Var("abs(edB('PVDZ'))",float,doc="dz uncertainty, in cm",precision=6),
+        dxy = Var("dB('PV2D')",float,doc="dxy (with sign) wrt first PV, in cm",precision=10),
+        dxyErr = Var("edB('PV2D')",float,doc="dxy uncertainty, in cm",precision=6),
+        vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
+        vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
+        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
+        ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
+        sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV",precision=10)
 #        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
    )
 )
+
+from  PhysicsTools.NanoAOD.triggerObjects_cff import *
+
+process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProducer",
+    name= cms.string("TrigObjBPark"),
+    src = cms.InputTag("unpackedPatTrigger"),
+    l1Muon = cms.InputTag("gmtStage2Digis","Muon"),
+    selections = cms.VPSet(
+        cms.PSet(
+            name = cms.string("Muon"),
+            id = cms.int32(13),
+            sel = cms.string("type(83) && pt > 5 && coll('hltIterL3MuonCandidates')"), 
+            l1seed = cms.string("type(-81)"), l1deltaR = cms.double(0.5),
+            l2seed = cms.string("type(83) && coll('hltL2MuonCandidates')"),  l2deltaR = cms.double(0.3),
+            qualityBits = cms.string("filter('hltL3fL1s*Park*')"), qualityBitsDoc = cms.string("1 = Muon filters for BPH parking"),
+        ),
+    ),
+)
+
 
 # B-parking collection sequences
 process.muonBParkSequence = cms.Sequence(process.muonTrgSelector * process.countTrgMuons)
@@ -547,7 +577,7 @@ process.muonBParkSequence = cms.Sequence(process.muonTrgSelector * process.count
 process.muonBParkMC       = cms.Sequence(process.muonBParkSequence)
 process.muonBParkTables   = cms.Sequence(process.muonBParkTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
-
+process.triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + process.triggerObjectBParkTable )
 # ------------------------------------------------------------------------
 
 # ========================================================================
@@ -576,6 +606,7 @@ if options.isData:
 
     # B-parking additions
     process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables
+    process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
 
 
 # ========================================================================
@@ -599,6 +630,7 @@ else:
 
     # B-parking additions
     process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables
+    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
     process.llpnanoAOD_step += process.muonBParkMC
     
     # LHE
