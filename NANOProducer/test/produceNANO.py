@@ -567,14 +567,12 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
     ),
 )
 
-
 # B-parking collection sequences
 process.muonBParkSequence = cms.Sequence(process.muonTrgSelector * process.countTrgMuons)
-#process.muonBParkMC       = cms.Sequence(process.muonBParkSequence + process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
-process.muonBParkMC       = cms.Sequence(process.muonBParkSequence)
 process.muonBParkTables   = cms.Sequence(process.muonBParkTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
 process.triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + process.triggerObjectBParkTable )
+#process.muonBParkMC       = cms.Sequence(process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
 
 #from PhysicsTools.NanoAOD.common_cff import *
 #from PhysicsTools.NanoAOD.globals_cff import *
@@ -608,6 +606,7 @@ if options.isData:
 
     # B-parking additions
     process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
+    
     #process.llpnanoAOD_step_mu += process.metadata
 
 # ========================================================================
@@ -631,8 +630,10 @@ else:
 
     # B-parking additions
     process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
-    process.llpnanoAOD_step += process.muonBParkMC
-    
+    #process.llpnanoAOD_step += process.muonBParkMC
+
+    #process.llpnanoAOD_step_mu += process.metadata
+
     # LHE
     if options.addSignalLHE:
         process.llpnanoAOD_step += process.lheWeightsTable
