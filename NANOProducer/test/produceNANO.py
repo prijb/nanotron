@@ -32,7 +32,7 @@ options.register(
 
 options.register(
     'year',
-    '2016',
+    '2018',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "add year file"
@@ -504,6 +504,7 @@ process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     ),
 )
 
+"""
 process.muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher", # cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = process.muonBParkTable.src,                   # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"),       # final mc-truth particle collection
@@ -529,6 +530,7 @@ process.selectedMuonsMCMatchEmbedded = cms.EDProducer('MuonMatchEmbedder',
     src = cms.InputTag('muonTrgSelector:SelectedMuons'),
     matching = cms.InputTag('muonsBParkMCMatchForTable')
 )
+"""
 
 process.muonTriggerMatchedTable = process.muonBParkTable.clone(
     src = cms.InputTag("muonTrgSelector:trgMuons"),
@@ -570,14 +572,10 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
 # B-parking collection sequences
 process.muonBParkSequence = cms.Sequence(process.muonTrgSelector * process.countTrgMuons)
 process.muonBParkTables   = cms.Sequence(process.muonBParkTable)
-process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
+process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)
 process.triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + process.triggerObjectBParkTable )
 #process.muonBParkMC       = cms.Sequence(process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
 
-#from PhysicsTools.NanoAOD.common_cff import *
-#from PhysicsTools.NanoAOD.globals_cff import *
-#from PhysicsTools.NanoAOD.nano_cff import *
-#process.metadata = cms.Sequence(nanoMetadata)
 # ------------------------------------------------------------------------
 
 # ========================================================================
@@ -629,7 +627,7 @@ else:
 
     # B-parking additions
     process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
-    #process.llpnanoAOD_step += process.muonBParkMC
+    #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
     if options.addSignalLHE:
