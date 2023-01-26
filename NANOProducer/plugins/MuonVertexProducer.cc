@@ -199,7 +199,8 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                         Measurement1D dl= vdist.distance(PV0,VertexState(RecoVertex::convertPos(vertex.position()),RecoVertex::convertError(vertex.error())));
                         if(dl.value() > dlenMin_ and dl.significance() > dlenSigMin_){
                             double dx = (PV0.x() - vertex.x()), dy = (PV0.y() - vertex.y()), dz = (PV0.z() - vertex.z());
-                            double pdotv = (dx * vertex.p4(muonMass).px() + dy*vertex.p4(muonMass).py() + dz*vertex.p4(muonMass).pz())/(vertex.p4(muonMass).mag()*sqrt(dx*dx + dy*dy + dz*dz));
+                            double pmag = sqrt(vertex.p4(muonMass).px()*vertex.p4(muonMass).px()+vertex.p4(muonMass).py()*vertex.p4(muonMass).py()+vertex.p4(muonMass).pz()*vertex.p4(muonMass).pz());
+                            double pdotv = (dx * vertex.p4(muonMass).px() + dy*vertex.p4(muonMass).py() + dz*vertex.p4(muonMass).pz())/(pmag*sqrt(dx*dx + dy*dy + dz*dz));
                             // std::cout << vertex.p4(0.107).mass() << std::endl;
                             // vxy = sqrt(vertex.x()*vertex.x() + vertex.y()*vertex.y());
                             // sigma_vxy = (1/vxy)*sqrt(vertex.x()*vertex.x()*vertex.xError()*vertex.xError() +
@@ -208,6 +209,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             // vtx_chi2 = vertex.normalizedChi2();
                             // vz = vertex.z();
                             // dr = reco::deltaR(*muon_i, *muon_j);
+                            std::cout << pdotv << std::endl;
                             ROOT::Math::PtEtaPhiMVector propagatedP4(0,0,0,0);
                             for(auto trans : transient_tracks){
                                 GlobalPoint vert(vertex.x(),vertex.y(),vertex.z());
