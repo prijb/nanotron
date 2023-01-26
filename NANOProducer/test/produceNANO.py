@@ -442,7 +442,34 @@ process.countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("muonTrgSelector", "trgMuons")
 )
+process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
+        srcMuon = cms.InputTag("slimmedMuons"),
+    pvSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    svCut = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    svName = cms.string("muonSV"),
+)
+# process.muonVertexTable = cms.EDProducer("MuonVertexTableProducer",
+#     svSrc = cms.InputTag("muonVertices"),
+# )
 
+# process.svCandidateTableForMuons =  cms.EDProducer("SimpleCandidateFlatTableProducer",
+#     src = cms.InputTag("muonVertices"),
+#     cut = cms.string(""),  #DO NOT further cut here, use vertexTable.svCut
+#     name = cms.string("muonSV"),
+#     singleton = cms.bool(False), # the number of entries is variable
+#     extension = cms.bool(False), 
+#     variables = cms.PSet(P4Vars,
+#         x   = Var("position().x()", float, doc = "secondary vertex X position, in cm",precision=10),
+#         y   = Var("position().y()", float, doc = "secondary vertex Y position, in cm",precision=10),
+#         z   = Var("position().z()", float, doc = "secondary vertex Z position, in cm",precision=14),
+#         ndof   = Var("vertexNdof()", float, doc = "number of degrees of freedom",precision=8),
+#         chi2   = Var("vertexNormalizedChi2()", float, doc = "reduced chi2, i.e. chi/ndof",precision=8),
+#     ),
+# )
+# process.svCandidateTableForMuons.variables.pt.precision=10
+# process.svCandidateTableForMuons.variables.phi.precision=12
 
 process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = cms.InputTag("muonTrgSelector:SelectedMuons"),
@@ -573,6 +600,7 @@ process.muonBParkSequence = cms.Sequence(process.muonTrgSelector * process.count
 #process.muonBParkMC       = cms.Sequence(process.muonBParkSequence + process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
 process.muonBParkMC       = cms.Sequence(process.muonBParkSequence)
 process.muonBParkTables   = cms.Sequence(process.muonBParkTable)
+process.muonVertexSequence = cms.Sequence(process.muonVerticesTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
 process.triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + process.triggerObjectBParkTable )
 
@@ -607,8 +635,8 @@ if options.isData:
     )
 
     # B-parking additions
-    process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
-    process.llpnanoAOD_step_ele += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
+    process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
+    process.llpnanoAOD_step_ele += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
     #process.llpnanoAOD_step_mu += process.metadata
 
 # ========================================================================
@@ -631,7 +659,7 @@ else:
     )
 
     # B-parking additions
-    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
+    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
     process.llpnanoAOD_step += process.muonBParkMC
     
     # LHE
