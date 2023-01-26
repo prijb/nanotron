@@ -450,26 +450,6 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     dlenSigMin = cms.double(0),
     svName = cms.string("muonSV"),
 )
-# process.muonVertexTable = cms.EDProducer("MuonVertexTableProducer",
-#     svSrc = cms.InputTag("muonVertices"),
-# )
-
-# process.svCandidateTableForMuons =  cms.EDProducer("SimpleCandidateFlatTableProducer",
-#     src = cms.InputTag("muonVertices"),
-#     cut = cms.string(""),  #DO NOT further cut here, use vertexTable.svCut
-#     name = cms.string("muonSV"),
-#     singleton = cms.bool(False), # the number of entries is variable
-#     extension = cms.bool(False), 
-#     variables = cms.PSet(P4Vars,
-#         x   = Var("position().x()", float, doc = "secondary vertex X position, in cm",precision=10),
-#         y   = Var("position().y()", float, doc = "secondary vertex Y position, in cm",precision=10),
-#         z   = Var("position().z()", float, doc = "secondary vertex Z position, in cm",precision=14),
-#         ndof   = Var("vertexNdof()", float, doc = "number of degrees of freedom",precision=8),
-#         chi2   = Var("vertexNormalizedChi2()", float, doc = "reduced chi2, i.e. chi/ndof",precision=8),
-#     ),
-# )
-# process.svCandidateTableForMuons.variables.pt.precision=10
-# process.svCandidateTableForMuons.variables.phi.precision=12
 
 process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = cms.InputTag("muonTrgSelector:SelectedMuons"),
