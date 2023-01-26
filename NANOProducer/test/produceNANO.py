@@ -442,7 +442,14 @@ process.countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("muonTrgSelector", "trgMuons")
 )
-
+process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
+        srcMuon = cms.InputTag("slimmedMuons"),
+    pvSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    svCut = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    svName = cms.string("muonSV"),
+)
 
 process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = cms.InputTag("muonTrgSelector:SelectedMuons"),
@@ -572,7 +579,8 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
 # B-parking collection sequences
 process.muonBParkSequence = cms.Sequence(process.muonTrgSelector * process.countTrgMuons)
 process.muonBParkTables   = cms.Sequence(process.muonBParkTable)
-process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)
+process.muonVertexSequence = cms.Sequence(process.muonVerticesTable)
+process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
 process.triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + process.triggerObjectBParkTable )
 #process.muonBParkMC       = cms.Sequence(process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
 
@@ -603,8 +611,9 @@ if options.isData:
     )
 
     # B-parking additions
-    process.llpnanoAOD_step_mu  += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
-    process.llpnanoAOD_step_ele += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
+    process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
+    process.llpnanoAOD_step_ele += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
+    #process.llpnanoAOD_step_mu += process.metadata
 
 # ========================================================================
 # ** MC SEQUENCE **
@@ -626,7 +635,7 @@ else:
     )
 
     # B-parking additions
-    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables
+    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
     #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
