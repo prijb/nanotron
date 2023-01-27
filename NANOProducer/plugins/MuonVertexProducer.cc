@@ -77,7 +77,7 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
       edm::InputTag _muonInputTag;
       edm::EDGetTokenT<std::vector<pat::Muon>> _muonToken;
       const std::string  svName_;
-      const double dlenMin_,dlenSigMin_;
+      const double ptMin_,dlenMin_,dlenSigMin_;
       const edm::EDGetTokenT<std::vector<reco::Vertex>> pvs_;
       const StringCutObjectSelector<reco::Vertex> svCut_;
 
@@ -105,6 +105,7 @@ MuonVertexProducer::MuonVertexProducer(const edm::ParameterSet& iConfig):
     _muonInputTag(iConfig.getParameter<edm::InputTag>("srcMuon")),
     _muonToken(consumes<std::vector<pat::Muon>>(_muonInputTag)),
     svName_(iConfig.getParameter<std::string>("svName") ),
+    ptMin_(iConfig.getParameter<double>("ptMin") ),
     dlenMin_(iConfig.getParameter<double>("dlenMin") ),
     dlenSigMin_(iConfig.getParameter<double>("dlenSigMin") ),
     pvs_(consumes<std::vector<reco::Vertex>>( iConfig.getParameter<edm::InputTag>("pvSrc") )),
@@ -142,7 +143,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     edm::Handle<std::vector<reco::Vertex>> pvsIn;
     iEvent.getByToken(pvs_, pvsIn);
 
-    std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass;
+    std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
@@ -153,7 +154,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     for (size_t i = 0; i < muons->size(); i++) {
         pat::MuonRef muon_i(muons, i);
         reco::TrackRef track_i = muons->at(i).muonBestTrack();
-        if (track_i.isNonnull()) {
+        if (track_i.isNonnull() && track_i->pt() > ptMin_) {
             muTracks.emplace_back(track_i);
             muObjs.emplace_back(muon_i);
         }
@@ -173,7 +174,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     auto vertices = std::make_unique<std::vector<reco::Vertex>>();
 
     for (size_t i = 0; i < muTracks.size(); i++) {
-        for (size_t j = 0; j < muTracks.size(); j++) {
+        for (size_t j = i+1; j < muTracks.size(); j++) {
             reco::TrackRef muon_i, muon_j;
             if (i < muTracks.size())
                 muon_i = muTracks[i];
@@ -209,7 +210,6 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             // vtx_chi2 = vertex.normalizedChi2();
                             // vz = vertex.z();
                             // dr = reco::deltaR(*muon_i, *muon_j);
-                            std::cout << pdotv << std::endl;
                             ROOT::Math::PtEtaPhiMVector propagatedP4(0,0,0,0);
                             for(auto trans : transient_tracks){
                                 GlobalPoint vert(vertex.x(),vertex.y(),vertex.z());
@@ -233,6 +233,8 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             z.push_back(vertex.z());
                             ndof.push_back(vertex.ndof());
                             chi2.push_back(vertex.normalizedChi2());
+                            mu1pt.push_back(muObjs[i]->pt());
+                            mu2pt.push_back(muObjs[j]->pt());
                             nGoodSV++;
                         }
                     }
@@ -255,6 +257,8 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("mass",propMass,"mass propoagated to the vertex position",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",nanoaod::FlatTable::FloatColumn,10);
 
 
     iEvent.put(std::move(vertices));

@@ -272,6 +272,15 @@ process.MCGenDecayInfo = cms.EDProducer(
     "MCGenDecayInfoProducer",
     src = cms.InputTag("genParticlesMerged"),
     decays = cms.PSet(
+        #dark
+        dark_vector = cms.PSet(
+            llpId = cms.int32(4900113),
+            daughterIds = cms.vint32([1,2,3,4,5,11,13,15])
+        ),
+        dark_photon = cms.PSet(
+            llpId = cms.int32(999999),
+            daughterIds = cms.vint32([1,2,3,4,5,11,13,15])
+        ),
         #hnl -> qql
         hnl_dirac = cms.PSet(
             llpId = cms.int32(9990012),
@@ -448,8 +457,25 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svCut = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
     dlenSigMin = cms.double(0),
+    ptMin = cms.double(0.8),
     svName = cms.string("muonSV"),
 )
+# process.muonVerticesCandidateTable =  cms.EDProducer("SimpleCandidateFlatTableProducer",
+#     src = cms.InputTag("muonVerticesTable"),
+#     cut = cms.string(""),  #DO NOT further cut here, use vertexTable.svCut
+#     name = cms.string("muonSV"),
+#     singleton = cms.bool(False), # the number of entries is variable
+#     extension = cms.bool(True), 
+#     variables = cms.PSet(P4Vars,
+#         x   = Var("position().x()", float, doc = "secondary vertex X position, in cm",precision=10),
+#         # y   = Var("position().y()", float, doc = "secondary vertex Y position, in cm",precision=10),
+#         # z   = Var("position().z()", float, doc = "secondary vertex Z position, in cm",precision=14),
+#         # ndof   = Var("vertexNdof()", float, doc = "number of degrees of freedom",precision=8),
+#         # chi2   = Var("vertexNormalizedChi2()", float, doc = "reduced chi2, i.e. chi/ndof",precision=8),
+#     ),
+# )
+# process.muonVerticesCandidateTable.variables.pt.precision=10
+# process.muonVerticesCandidateTable.variables.phi.precision=12
 
 process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = cms.InputTag("muonTrgSelector:SelectedMuons"),
@@ -725,6 +751,13 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
 '''
 
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
+from os import getenv
+if options.isData:
+    import FWCore.PythonUtilities.LumiList as LumiList
+    goldenjson = "Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
+    lumilist = LumiList.LumiList(filename=goldenjson).getCMSSWString().split(',')
+    print("Found json list of lumis to process with {} lumi sections from {}".format(len(lumilist),goldenjson))
+    process.source.lumisToProcess = cms.untracked(cms.VLuminosityBlockRange()+lumilist)
 
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
