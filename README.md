@@ -17,8 +17,13 @@ Initialize the environment
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 ```
 
-Initialize CMSSW
+Initialize GRID
+```
+source /vols/grid/cms/setup.sh
+voms-proxy-init --voms cms
+```
 
+Initialize CMSSW
 ```
 scram list CMSSW
 
