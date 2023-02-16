@@ -451,8 +451,23 @@ process.countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("muonTrgSelector", "trgMuons")
 )
+# process.printContent = cms.EDAnalyzer("EventContentAnalyzer",
+#     #should we print data? (sets to 'true' if verboseForModuleLabels has entries)
+#     verbose = cms.untracked.bool(False),
+#     #how much to indent when printing verbosely
+#     verboseIndentation = cms.untracked.string('  '),
+#     #string used at the beginning of all output of this module
+#     indentation = cms.untracked.string('++'),
+#     #data from which modules to print (all if empty)
+#     verboseForModuleLabels = cms.untracked.vstring(),
+#     # which data from which module should we get without printing
+#     getDataForModuleLabels = cms.untracked.vstring(),
+#     #should we get data? (sets to 'true' if getDataFormModuleLabels has entries)
+#     getData = cms.untracked.bool(False)
+# )
+#
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
-        srcMuon = cms.InputTag("slimmedMuons"),
+        srcMuon = cms.InputTag("finalMuons"),
     pvSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
@@ -749,6 +764,7 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
     dropMetaData = cms.untracked.string('ALL'),
 )
 '''
+#process.endpath= cms.EndPath(process.OUT)
 
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 from os import getenv
@@ -765,4 +781,3 @@ process = customiseEarlyDelete(process)
 #print process.dumpPython()
 # End adding early deletion
 
-#process.endpath= cms.EndPath(process.OUT)
