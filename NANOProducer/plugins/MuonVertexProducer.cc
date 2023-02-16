@@ -75,7 +75,7 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
       void endStream() override;
       
       edm::InputTag _muonInputTag;
-      edm::EDGetTokenT<std::vector<pat::Muon>> _muonToken;
+      edm::EDGetTokenT<edm::RefVector<std::vector<pat::Muon>>> _muonToken;
       const std::string  svName_;
       const double ptMin_,dlenMin_,dlenSigMin_;
       const edm::EDGetTokenT<std::vector<reco::Vertex>> pvs_;
@@ -103,7 +103,7 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
 //
 MuonVertexProducer::MuonVertexProducer(const edm::ParameterSet& iConfig):
     _muonInputTag(iConfig.getParameter<edm::InputTag>("srcMuon")),
-    _muonToken(consumes<std::vector<pat::Muon>>(_muonInputTag)),
+    _muonToken(consumes<edm::RefVector<std::vector<pat::Muon>>>(_muonInputTag)),
     svName_(iConfig.getParameter<std::string>("svName") ),
     ptMin_(iConfig.getParameter<double>("ptMin") ),
     dlenMin_(iConfig.getParameter<double>("dlenMin") ),
@@ -135,7 +135,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
        // Pick pair of muons with smallest vertex chi square fit for all collection combos
-    edm::Handle<std::vector<pat::Muon>> muons;
+    edm::Handle<edm::RefVector<std::vector<pat::Muon>>> muons;
     iEvent.getByToken(_muonToken, muons);
     std::vector<reco::TrackRef> muTracks{};
     std::vector<pat::MuonRef> muObjs{};
@@ -144,29 +144,35 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(pvs_, pvsIn);
 
     std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt;
+    std::vector<int> mu1index,mu2index;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
     size_t nGoodSV=0;
     float muonMass=0.1057;
     const auto & PV0 = pvsIn->front();
-
+    std::vector<int> origIndex; 
     for (size_t i = 0; i < muons->size(); i++) {
-        pat::MuonRef muon_i(muons, i);
-        reco::TrackRef track_i = muons->at(i).muonBestTrack();
+        reco::TrackRef track_i = muons->at(i)->muonBestTrack();
         if (track_i.isNonnull() && track_i->pt() > ptMin_) {
             muTracks.emplace_back(track_i);
-            muObjs.emplace_back(muon_i);
+            muObjs.emplace_back(muons->at(i));
+            origIndex.emplace_back(i);
         }
     }
-   sort(muTracks.begin(), muTracks.end(), [](const auto & l, const auto & r) {
-       return l->pt() > r->pt();
-       });
-   sort(muObjs.begin(), muObjs.end(), [](const auto & l, const auto & r) {
-        reco::TrackRef lt = l->muonBestTrack();
-        reco::TrackRef rt = r->muonBestTrack();
-        return lt->pt() > rt->pt();
-    });
+    std::sort(origIndex.begin(), origIndex.end(),
+            [&muTracks](const int& a, const int& b)
+            {
+            return muTracks[a]->pt() > muTracks[b]->pt();
+            });
+    sort(muTracks.begin(), muTracks.end(), [](const auto & l, const auto & r) {
+            return l->pt() > r->pt();
+            });
+    sort(muObjs.begin(), muObjs.end(), [](const auto & l, const auto & r) {
+            reco::TrackRef lt = l->muonBestTrack();
+            reco::TrackRef rt = r->muonBestTrack();
+            return lt->pt() > rt->pt();
+            });
 
     edm::ESHandle<TransientTrackBuilder> theB;
     iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
@@ -235,6 +241,9 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             chi2.push_back(vertex.normalizedChi2());
                             mu1pt.push_back(muObjs[i]->pt());
                             mu2pt.push_back(muObjs[j]->pt());
+                            mu1index.push_back(origIndex[i]);
+                            mu2index.push_back(origIndex[j]);
+                            // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
                             nGoodSV++;
                         }
                     }
@@ -259,6 +268,8 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     svsTable->addColumn<float>("mass",propMass,"mass propoagated to the vertex position",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex",nanoaod::FlatTable::IntColumn);
+    svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex",nanoaod::FlatTable::IntColumn);
 
 
     iEvent.put(std::move(vertices));

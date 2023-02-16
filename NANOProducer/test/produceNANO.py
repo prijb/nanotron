@@ -770,6 +770,7 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
     dropMetaData = cms.untracked.string('ALL'),
 )
 '''
+#process.endpath= cms.EndPath(process.OUT)
 
 # ------------------------------------------------------------------------
 # Golden lumisection JSON
@@ -790,4 +791,3 @@ process = customiseEarlyDelete(process)
 #print process.dumpPython()
 # End adding early deletion
 
-#process.endpath= cms.EndPath(process.OUT)
