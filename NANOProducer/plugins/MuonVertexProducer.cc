@@ -143,7 +143,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     edm::Handle<std::vector<reco::Vertex>> pvsIn;
     iEvent.getByToken(pvs_, pvsIn);
 
-    std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt;
+    std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu1phi,mu2phi,mu1eta,mu2eta;
     std::vector<int> mu1index,mu2index;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
@@ -205,7 +205,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                     if (svCut_(vertex)) {
                         Measurement1D dl= vdist.distance(PV0,VertexState(RecoVertex::convertPos(vertex.position()),RecoVertex::convertError(vertex.error())));
                         if(dl.value() > dlenMin_ and dl.significance() > dlenSigMin_){
-                            double dx = (PV0.x() - vertex.x()), dy = (PV0.y() - vertex.y()), dz = (PV0.z() - vertex.z());
+                            double dx = (-PV0.x() + vertex.x()), dy = (-PV0.y() + vertex.y()), dz = (-PV0.z() + vertex.z());
                             double pmag = sqrt(vertex.p4(muonMass).px()*vertex.p4(muonMass).px()+vertex.p4(muonMass).py()*vertex.p4(muonMass).py()+vertex.p4(muonMass).pz()*vertex.p4(muonMass).pz());
                             double pdotv = (dx * vertex.p4(muonMass).px() + dy*vertex.p4(muonMass).py() + dz*vertex.p4(muonMass).pz())/(pmag*sqrt(dx*dx + dy*dy + dz*dz));
                             // std::cout << vertex.p4(0.107).mass() << std::endl;
@@ -241,6 +241,10 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             chi2.push_back(vertex.normalizedChi2());
                             mu1pt.push_back(muObjs[i]->pt());
                             mu2pt.push_back(muObjs[j]->pt());
+                            mu1phi.push_back(muObjs[i]->phi());
+                            mu2phi.push_back(muObjs[j]->phi());
+                            mu1eta.push_back(muObjs[i]->eta());
+                            mu2eta.push_back(muObjs[j]->eta());
                             mu1index.push_back(origIndex[i]);
                             mu2index.push_back(origIndex[j]);
                             // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
@@ -268,6 +272,10 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     svsTable->addColumn<float>("mass",propMass,"mass propoagated to the vertex position",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",nanoaod::FlatTable::FloatColumn,10);
+    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex",nanoaod::FlatTable::IntColumn);
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex",nanoaod::FlatTable::IntColumn);
 
