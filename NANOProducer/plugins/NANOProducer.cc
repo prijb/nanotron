@@ -26,6 +26,12 @@
 
 #include "FlatTableFiller.h"
 
+#include "DataFormats/PatCandidates/interface/Particle.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+
 //
 // class declaration
 //
@@ -549,36 +555,36 @@ NANOProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
         }
     }
 
-    lengthTable->addColumn<int>("cpf",       cpf_length,        "charged PF candidate track offset", nanoaod::FlatTable::IntColumn);
-    lengthTable->addColumn<int>("npf",       npf_length,        "neutral PF candidate offset",  nanoaod::FlatTable::IntColumn);
-    lengthTable->addColumn<int>("sv",        sv_length,         "secondary vertex (SV) offset", nanoaod::FlatTable::IntColumn);
-    lengthTable->addColumn<int>("svAdapted", sv_adapted_length, "secondary vertex (SV) offset", nanoaod::FlatTable::IntColumn);
-    lengthTable->addColumn<int>("mu",        mu_length,         "muon offset",      nanoaod::FlatTable::IntColumn);
-    lengthTable->addColumn<int>("ele",       elec_length,       "electron offset",  nanoaod::FlatTable::IntColumn);
+    lengthTable->addColumn<int>("cpf",       cpf_length,        "charged PF candidate track offset");
+    lengthTable->addColumn<int>("npf",       npf_length,        "neutral PF candidate offset");
+    lengthTable->addColumn<int>("sv",        sv_length,         "secondary vertex (SV) offset");
+    lengthTable->addColumn<int>("svAdapted", sv_adapted_length, "secondary vertex (SV) offset");
+    lengthTable->addColumn<int>("mu",        mu_length,         "muon offset");
+    lengthTable->addColumn<int>("ele",       elec_length,       "electron offset");
     
     
-    globalTable->addColumn<int>("jetIdx", global_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    globalTable->addColumn<int>("jetIdx", global_jetIdx, "linked jet Idx");
     globalFillerList.fill(globalTable);
     
-    csvTable->addColumn<int>("jetIdx", csv_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    csvTable->addColumn<int>("jetIdx", csv_jetIdx, "linked jet Idx");
     csvFillerList.fill(csvTable);
 
-    cpfTable->addColumn<int>("jetIdx", cpf_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    cpfTable->addColumn<int>("jetIdx", cpf_jetIdx, "linked jet Idx");
     cpfFillerList.fill(cpfTable);
 
-    npfTable->addColumn<int>("jetIdx", npf_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    npfTable->addColumn<int>("jetIdx", npf_jetIdx, "linked jet Idx");
     npfFillerList.fill(npfTable);
 
-    svTable->addColumn<int>("jetIdx", sv_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    svTable->addColumn<int>("jetIdx", sv_jetIdx, "linked jet Idx");
     svFillerList.fill(svTable);
     
-    svTable_adapted->addColumn<int>("jetIdx", sv_adapted_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    svTable_adapted->addColumn<int>("jetIdx", sv_adapted_jetIdx, "linked jet Idx");
     svAdaptedFillerList.fill(svTable_adapted);
 
-    muonTable->addColumn<int>("jetIdx", mu_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    muonTable->addColumn<int>("jetIdx", mu_jetIdx, "linked jet Idx");
     muonFillerList.fill(muonTable);
 
-    electronTable->addColumn<int>("jetIdx", elec_jetIdx, "linked jet Idx", nanoaod::FlatTable::IntColumn);
+    electronTable->addColumn<int>("jetIdx", elec_jetIdx, "linked jet Idx");
     electronFillerList.fill(electronTable);
     
     iEvent.put(std::move(globalTable),     "global");

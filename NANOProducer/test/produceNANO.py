@@ -61,10 +61,12 @@ elif options.year == '2017':
     process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
 elif options.year == '2018' or options.year == '2018D':
     process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
+elif options.year == '2022':
+    process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
 else:
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
-print "Selected year: ", options.year
+print("Selected year: ", options.year)
 
 # ------------------------------------------------------------------------
 # Import of standard configurations
@@ -209,12 +211,14 @@ if options.year == "test":
 if options.isData:
     if options.year == '2016':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
-    if options.year == '2017':
+    elif options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
-    if options.year == '2018':
+    elif options.year == '2018':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
-    if options.year == '2018D':
+    elif options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16', '')
+    elif options.year == '2022':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
 else:
     if options.year == '2016':
@@ -747,13 +751,13 @@ modulesToRemove = [
 
 for moduleName in modulesToRemove:
     if hasattr(process,moduleName):
-        print "removing module: ",moduleName
+        print("removing module:", moduleName)
         if options.isData:
             process.nanoSequence.remove(getattr(process,moduleName))
         else:
             process.nanoSequenceMC.remove(getattr(process,moduleName))
     else:
-        print "module for removal not found: ",moduleName
+        print("module for removal not found:", moduleName)
 
 #override final photons (required by object linker) so that ID evaluation is not needed
 #process.finalPhotons.cut = cms.string("pt > 5")
@@ -777,12 +781,12 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
 
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 from os import getenv
-if options.isData:
-    import FWCore.PythonUtilities.LumiList as LumiList
-    goldenjson = "nanotron/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
-    lumilist = LumiList.LumiList(filename=goldenjson).getCMSSWString().split(',')
-    print("Found json list of lumis to process with {} lumi sections from {}".format(len(lumilist),goldenjson))
-    process.source.lumisToProcess = cms.untracked(cms.VLuminosityBlockRange()+lumilist)
+# if options.isData:
+    # import FWCore.PythonUtilities.LumiList as LumiList
+    # goldenjson = "nanotron/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
+    # lumilist = LumiList.LumiList(filename=goldenjson).getCMSSWString().split(',')
+    # print("Found json list of lumis to process with {} lumi sections from {}".format(len(lumilist), goldenjson))
+    # process.source.lumisToProcess = cms.untracked(cms.VLuminosityBlockRange()+lumilist)
 
 # ------------------------------------------------------------------------
 # Add early deletion of temporary data products to reduce peak memory need

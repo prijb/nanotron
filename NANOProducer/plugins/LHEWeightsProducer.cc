@@ -82,7 +82,7 @@ class LHEWeightsProducer:
                     if (weightIt == weightGroup.second.end()) continue;
 
                     lheWeightTable->addColumnValue<float>(weightGroup.first + "_" + weightIt->second,
-                        weight.wgt / normWeight, "LHE weight", nanoaod::FlatTable::FloatColumn);
+                        weight.wgt / normWeight, "LHE weight");
                     
                     //std::cout<<weight.id<<" = "<<weight.wgt<<std::endl;
                 }
