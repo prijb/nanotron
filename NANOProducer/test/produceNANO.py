@@ -63,6 +63,8 @@ elif options.year == '2018' or options.year == '2018D':
     process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
 elif options.year == '2022':
     process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
+elif options.year == '2023':
+    process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
 else:
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
@@ -219,6 +221,8 @@ if options.isData:
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16', '')
     elif options.year == '2022':
         process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
+    elif options.year == '2023':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_v1', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
 else:
     if options.year == '2016':
