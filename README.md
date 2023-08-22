@@ -27,15 +27,15 @@ Initialize CMSSW
 ```
 scram list CMSSW
 
-cmsrel CMSSW_10_2_22
-cd CMSSW_10_2_22/src
+cmsrel CMSSW_13_0_10
+cd CMSSW_13_0_10/src
 
 cmsenv
 ```
 
 Pull the repo
 ```
-git clone git@github.com:mieskolainen/nanotron.git nanotron
+git clone git@github.com:jaimeleonh/nanotron.git nanotron -b 2023
 ```
 
 Update the repo
@@ -56,6 +56,9 @@ cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=https://github.com/L
 cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-30to50_MuEnrichedPt5_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v3/100000/005594DA-4AA0-3E48-A8C2-46DECDE2E925.root year=2018 test=True isData=False addSignalLHE=False
 
 cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2018B/ParkingBPH1/MINIAOD/05May2019-v2/230000/00496A25-08B6-FB4E-9681-D5FF4E1BE81F.root year=2018 test=True isData=True
+
+cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2023C/ParkingLLP/MINIAOD/PromptReco-v3/000/367/661/00000/0417d706-ded1-4f84-862f-f6a27f6c501e.root year=2023 isData=True
+
 ```
 
 Test the custom NanoAOD tree (TBD)

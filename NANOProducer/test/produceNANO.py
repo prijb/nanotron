@@ -435,12 +435,15 @@ process.electronFilterSequence = cms.Sequence(
 # ------------------------------------------------------------------------
 # Customisation function from PhysicsTools.NanoAOD.nano_cff
 
-from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData, nanoAOD_customizeMC
+# from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData, nanoAOD_customizeMC
+from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeCommon
 
 if options.isData:
-    process = nanoAOD_customizeData(process)
+    # process = nanoAOD_customizeData(process)
+    process = nanoAOD_customizeCommon(process)
 else:
-    process = nanoAOD_customizeMC(process)
+    # process = nanoAOD_customizeMC(process)
+    process = nanoAOD_customizeCommon(process)
 
 # ------------------------------------------------------------------------
 # B-parking muon selection from:
