@@ -121,6 +121,7 @@ public:
 
         edm::EDGetTokenT< pat::MuonCollection > muonsMiniAODToken_;
         edm::EDGetTokenT< pat::ElectronCollection > electronsMiniAODToken_;
+        const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbESToken_;
 };
 
 OnionInfoProducer::OnionInfoProducer(const edm::ParameterSet& iConfig) :
@@ -130,7 +131,8 @@ OnionInfoProducer::OnionInfoProducer(const edm::ParameterSet& iConfig) :
     sv_adapted_token_(consumes<reco::VertexCompositePtrCandidateCollection>(iConfig.getParameter<edm::InputTag>("secondary_vertices_adapted"))),
     shallow_tag_info_token_(consumes<edm::View<reco::ShallowTagInfo>>(iConfig.getParameter<edm::InputTag>("shallow_tag_infos"))),
     muonsMiniAODToken_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"))),
-    electronsMiniAODToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"))) { produces<OnionTagInfoCollection>();
+    electronsMiniAODToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"))),
+    ttbESToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))){ produces<OnionTagInfoCollection>();
 }
 
 
@@ -156,8 +158,9 @@ void OnionInfoProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
     const auto& pv = vtxs->at(0);
-    edm::ESHandle<TransientTrackBuilder> builder;
-    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
+    const TransientTrackBuilder* builder = &iSetup.getData(ttbESToken_);
+    // edm::ESHandle<TransientTrackBuilder> builder;
+    // iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
 
 
     edm::Handle<reco::VertexCompositePtrCandidateCollection> svs;

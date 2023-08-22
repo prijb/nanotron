@@ -235,6 +235,7 @@ else:
 from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 
+
 updateJetCollection(
     process,
     labelName      = "OnionTag",
@@ -247,11 +248,12 @@ updateJetCollection(
     muSource       = cms.InputTag('slimmedMuons'),
     elSource       = cms.InputTag('slimmedElectrons'),
     btagInfos = [
-        'pfImpactParameterTagInfos',
-        'pfInclusiveSecondaryVertexFinderTagInfos',
-        'pfDeepCSVTagInfos',
+        # 'pfImpactParameterTagInfos',
+        # 'pfInclusiveSecondaryVertexFinderTagInfos',
+        # 'pfDeepCSVTagInfos',
+        'pfDeepFlavourTagInfos'
     ],
-    btagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags'],
+    btagDiscriminators = ['pfDeepFlavourJetTags:probb', 'pfDeepFlavourJetTags:probbb'],
     explicitJTA = False,
 )
 
@@ -261,6 +263,7 @@ process.pfOnionTagInfos = cms.EDProducer("OnionInfoProducer",
     muonSrc                    = cms.InputTag("slimmedMuons"),
     electronSrc                = cms.InputTag("slimmedElectrons"),
     shallow_tag_infos          = cms.InputTag('pfDeepCSVTagInfosOnionTag'),
+    # shallow_tag_infos          = cms.InputTag('pfDeepFlavourTagInfosOnionTag'), # not usable, dows not produce a shallow_tag_infos
     vertices                   = cms.InputTag('offlineSlimmedPrimaryVertices'),
     secondary_vertices_adapted = cms.InputTag("adaptedSlimmedSecondaryVertices"),
     secondary_vertices         = cms.InputTag("slimmedSecondaryVertices")
@@ -268,13 +271,13 @@ process.pfOnionTagInfos = cms.EDProducer("OnionInfoProducer",
 
 
 process.nanoTable = cms.EDProducer("NANOProducer",
-    srcJets   = cms.InputTag("finalJets"),
+    srcJets   = cms.InputTag("updatedJets"),
     srcTags   = cms.InputTag("pfOnionTagInfos")
 )
 
 
 process.nanoGenTable = cms.EDProducer("NANOGenProducer",
-    srcJets   = cms.InputTag("finalJets"),
+    srcJets   = cms.InputTag("updatedJets"),
     srcLabels = cms.InputTag("MCLabels"),
     srcTags   = cms.InputTag("pfOnionTagInfos")
 )
@@ -330,7 +333,7 @@ process.MCGenDecayInfo = cms.EDProducer(
 process.MCLabels = cms.EDProducer(
     "MCLabelProducer",
     srcVertices  = cms.InputTag("displacedGenVertices"),
-    srcJets      = cms.InputTag("updatedJets"),
+    srcJets      = cms.InputTag("finalJets"),
     srcDecayInfo = cms.InputTag("MCGenDecayInfo"),
 )
 
@@ -646,7 +649,9 @@ if options.isData:
         process.adaptedVertexing+
         
         process.pfOnionTagInfos+
-        process.nanoTable
+        process.nanoTable,
+        process.jetTask,
+        # process.jetForMETTask 
     )
 
     """
@@ -792,6 +797,5 @@ from os import getenv
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
-#print process.dumpPython()
+# print(process.dumpPython())
 # End adding early deletion
-

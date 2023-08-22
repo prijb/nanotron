@@ -75,7 +75,8 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
       void endStream() override;
       
       edm::InputTag _muonInputTag;
-      edm::EDGetTokenT<edm::View<pat::Muon>> _muonToken;
+      edm::EDGetTokenT<std::vector<pat::Muon>> _muonToken;
+      const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbESToken_;
       const std::string  svName_;
       const double ptMin_,dlenMin_,dlenSigMin_;
       const edm::EDGetTokenT<std::vector<reco::Vertex>> pvs_;
@@ -103,7 +104,8 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
 //
 MuonVertexProducer::MuonVertexProducer(const edm::ParameterSet& iConfig):
     _muonInputTag(iConfig.getParameter<edm::InputTag>("srcMuon")),
-    _muonToken(consumes<edm::View<pat::Muon>>(_muonInputTag)),
+    _muonToken(consumes<std::vector<pat::Muon>>(_muonInputTag)),
+    ttbESToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
     svName_(iConfig.getParameter<std::string>("svName") ),
     ptMin_(iConfig.getParameter<double>("ptMin") ),
     dlenMin_(iConfig.getParameter<double>("dlenMin") ),
@@ -135,10 +137,10 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
        // Pick pair of muons with smallest vertex chi square fit for all collection combos
-    edm::Handle<edm::View<pat::Muon>> muons;
+    edm::Handle<std::vector<pat::Muon>> muons;
     iEvent.getByToken(_muonToken, muons);
     std::vector<reco::TrackRef> muTracks{};
-    std::vector<pat::MuonRef> muObjs{};
+    std::vector<pat::Muon> muObjs{};
 
     edm::Handle<std::vector<reco::Vertex>> pvsIn;
     iEvent.getByToken(pvs_, pvsIn);
@@ -153,7 +155,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     const auto & PV0 = pvsIn->front();
     std::vector<int> origIndex; 
     for (size_t i = 0; i < muons->size(); i++) {
-        reco::TrackRef track_i = muons->at(i)->muonBestTrack();
+        reco::TrackRef track_i = muons->at(i).muonBestTrack();
         if (track_i.isNonnull() && track_i->pt() > ptMin_) {
             muTracks.emplace_back(track_i);
             muObjs.emplace_back(muons->at(i));
@@ -169,13 +171,14 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             return l->pt() > r->pt();
             });
     sort(muObjs.begin(), muObjs.end(), [](const auto & l, const auto & r) {
-            reco::TrackRef lt = l->muonBestTrack();
-            reco::TrackRef rt = r->muonBestTrack();
+            reco::TrackRef lt = l.muonBestTrack();
+            reco::TrackRef rt = r.muonBestTrack();
             return lt->pt() > rt->pt();
             });
 
-    edm::ESHandle<TransientTrackBuilder> theB;
-    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
+    // edm::ESHandle<TransientTrackBuilder> theB;
+    // iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
+    const TransientTrackBuilder* theB = &iSetup.getData(ttbESToken_);
     KalmanVertexFitter kvf(true);
     auto vertices = std::make_unique<std::vector<reco::Vertex>>();
 
@@ -188,7 +191,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 muon_j = muTracks[j];
 
             TransientVertex tv;
-            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j && muObjs[i]->charge() != muObjs[j]->charge()) {
+            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j && muObjs[i].charge() != muObjs[j].charge()) {
                 std::vector<reco::TransientTrack> transient_tracks{};
                 transient_tracks.push_back(theB->build(muon_i));
                 transient_tracks.push_back(theB->build(muon_j));
@@ -239,12 +242,12 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             z.push_back(vertex.z());
                             ndof.push_back(vertex.ndof());
                             chi2.push_back(vertex.normalizedChi2());
-                            mu1pt.push_back(muObjs[i]->pt());
-                            mu2pt.push_back(muObjs[j]->pt());
-                            mu1phi.push_back(muObjs[i]->phi());
-                            mu2phi.push_back(muObjs[j]->phi());
-                            mu1eta.push_back(muObjs[i]->eta());
-                            mu2eta.push_back(muObjs[j]->eta());
+                            mu1pt.push_back(muObjs[i].pt());
+                            mu2pt.push_back(muObjs[j].pt());
+                            mu1phi.push_back(muObjs[i].phi());
+                            mu2phi.push_back(muObjs[j].phi());
+                            mu1eta.push_back(muObjs[i].eta());
+                            mu2eta.push_back(muObjs[j].eta());
                             mu1index.push_back(origIndex[i]);
                             mu2index.push_back(origIndex[j]);
                             // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
