@@ -8,7 +8,6 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingPFJet.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
@@ -46,10 +45,10 @@ void Run3ScoutingJetToPatJetProducer::produce(edm::Event &iEvent, const edm::Eve
 
     auto patJets = std::make_unique<std::vector<pat::Jet>>();
     for (const auto &jet: *jets) {
-        reco::Jet recojet;
+        pat::Jet patjet;
         math::PtEtaPhiMLorentzVectorD lv(jet.pt(), jet.eta(), jet.phi(), jet.m());
-        recojet.setP4(lv);
-        patJets->push_back(recojet);
+        patjet.setP4(lv);
+        patJets->push_back(patjet);
     }
     iEvent.put(std::move(patJets));
 }
