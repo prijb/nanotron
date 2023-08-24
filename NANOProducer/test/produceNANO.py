@@ -468,7 +468,7 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
 #)
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
-    srcMuon = cms.InputTag("slimmedMuons"),
+    srcMuon = cms.InputTag("finalMuons"),
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
