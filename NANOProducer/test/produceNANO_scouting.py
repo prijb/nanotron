@@ -98,7 +98,7 @@ else:
 # More options
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(100000)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -246,8 +246,19 @@ process.run3ScoutingJetToPatJet = cms.EDProducer("Run3ScoutingJetToPatJetProduce
 process.run3ScoutingEleToPatEle = cms.EDProducer("Run3ScoutingEleToPatEleProducer",
     eleSource=cms.InputTag("hltScoutingEgammaPacker"))
 
-process.run3ScoutingMuonToPatMuon = cms.EDProducer("Run3ScoutingMuonToPatMuonProducer",
+process.run3ScoutingMuonRecoTrack = cms.EDProducer("Run3ScoutingMuonRecoTrackProducer",
     muonSource=cms.InputTag("hltScoutingMuonPacker"))
+
+process.run3ScoutingMuonToPatMuon = cms.EDProducer("Run3ScoutingMuonToPatMuonProducer",
+    muonSource=cms.InputTag("hltScoutingMuonPacker"),
+    trackSource=cms.InputTag("run3ScoutingMuonRecoTrack")
+)
+
+process.run3ScoutingPVtoVertex= cms.EDProducer("Run3ScoutingVtxToVtxProducer",
+    vertexSource=cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"))
+
+process.run3ScoutingSVtoVertex= cms.EDProducer("Run3ScoutingVtxToVtxProducer",
+    vertexSource=cms.InputTag("hltScoutingMuonPacker", "displacedVtx"))
 
 process.jetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     cut = cms.string(''),
@@ -1295,12 +1306,194 @@ process.muonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     )
 )
 
+process.vertexTable = cms.EDProducer("VertexTableProducer",
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(3),
+    goodPvCut = cms.string('!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2'),
+    pvName = cms.string('PV'),
+    pvSrc = cms.InputTag("run3ScoutingPVtoVertex"),
+    svCut = cms.string(''),
+    svDoc = cms.string('secondary vertices from IVF algorithm'),
+    svName = cms.string('SV'),
+    svSrc = cms.InputTag("run3ScoutingSVtoVertex")
+)
+
+# process.pvTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    # cut = cms.string(''),
+    # doc = cms.string(''),
+    # extension = cms.bool(True),
+    # externalVariables = cms.PSet(
+
+    # ),
+    # maxLen = cms.optional.uint32,
+    # mightGet = cms.optional.untracked.vstring,
+    # name = cms.string('SV'),
+    # singleton = cms.bool(False),
+    # skipNonExistingSrc = cms.bool(False),
+    # src = cms.InputTag("run3ScoutingPVtoVertex"),
+    # variables = cms.PSet(
+        # chi2 = cms.PSet(
+            # doc = cms.string('reduced chi2, i.e. chi/ndof'),
+            # expr = cms.string('vertexNormalizedChi2()'),
+            # precision = cms.int32(8),
+            # type = cms.string('float')
+        # ),
+        # eta = cms.PSet(
+            # doc = cms.string('eta'),
+            # expr = cms.string('eta'),
+            # precision = cms.int32(12),
+            # type = cms.string('float')
+        # ),
+        # mass = cms.PSet(
+            # doc = cms.string('mass'),
+            # expr = cms.string('1'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # ndof = cms.PSet(
+            # doc = cms.string('number of degrees of freedom'),
+            # expr = cms.string('vertexNdof()'),
+            # precision = cms.int32(8),
+            # type = cms.string('float')
+        # ),
+        # ntracks = cms.PSet(
+            # doc = cms.string('number of tracks'),
+            # expr = cms.string('numberOfDaughters()'),
+            # precision = cms.int32(-1),
+            # type = cms.string('uint8')
+        # ),
+        # phi = cms.PSet(
+            # doc = cms.string('phi'),
+            # expr = cms.string('1'),
+            # precision = cms.int32(12),
+            # type = cms.string('float')
+        # ),
+        # pt = cms.PSet(
+            # doc = cms.string('pt'),
+            # expr = cms.string('1'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # x = cms.PSet(
+            # doc = cms.string('primary vertex X position, in cm'),
+            # expr = cms.string('position().x()'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # y = cms.PSet(
+            # doc = cms.string('primary vertex Y position, in cm'),
+            # expr = cms.string('position().y()'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # z = cms.PSet(
+            # doc = cms.string('primary vertex Z position, in cm'),
+            # expr = cms.string('position().z()'),
+            # precision = cms.int32(14),
+            # type = cms.string('float')
+        # )
+    # )
+# )
+
+# process.svTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    # cut = cms.string(''),
+    # doc = cms.string(''),
+    # extension = cms.bool(True),
+    # externalVariables = cms.PSet(
+
+    # ),
+    # maxLen = cms.optional.uint32,
+    # mightGet = cms.optional.untracked.vstring,
+    # name = cms.string('SV'),
+    # singleton = cms.bool(False),
+    # skipNonExistingSrc = cms.bool(False),
+    # src = cms.InputTag("run3ScoutingSVtoVertex"),
+    # variables = cms.PSet(
+        # chi2 = cms.PSet(
+            # doc = cms.string('reduced chi2, i.e. chi/ndof'),
+            # expr = cms.string('vertexNormalizedChi2()'),
+            # precision = cms.int32(8),
+            # type = cms.string('float')
+        # ),
+        # eta = cms.PSet(
+            # doc = cms.string('eta'),
+            # expr = cms.string('eta'),
+            # precision = cms.int32(12),
+            # type = cms.string('float')
+        # ),
+        # mass = cms.PSet(
+            # doc = cms.string('mass'),
+            # expr = cms.string('1'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # ndof = cms.PSet(
+            # doc = cms.string('number of degrees of freedom'),
+            # expr = cms.string('vertexNdof()'),
+            # precision = cms.int32(8),
+            # type = cms.string('float')
+        # ),
+        # ntracks = cms.PSet(
+            # doc = cms.string('number of tracks'),
+            # expr = cms.string('numberOfDaughters()'),
+            # precision = cms.int32(-1),
+            # type = cms.string('uint8')
+        # ),
+        # phi = cms.PSet(
+            # doc = cms.string('phi'),
+            # expr = cms.string('1'),
+            # precision = cms.int32(12),
+            # type = cms.string('float')
+        # ),
+        # pt = cms.PSet(
+            # doc = cms.string('pt'),
+            # expr = cms.string('1'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # x = cms.PSet(
+            # doc = cms.string('primary vertex X position, in cm'),
+            # expr = cms.string('position().x()'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # y = cms.PSet(
+            # doc = cms.string('primary vertex Y position, in cm'),
+            # expr = cms.string('position().y()'),
+            # precision = cms.int32(10),
+            # type = cms.string('float')
+        # ),
+        # z = cms.PSet(
+            # doc = cms.string('primary vertex Z position, in cm'),
+            # expr = cms.string('position().z()'),
+            # precision = cms.int32(14),
+            # type = cms.string('float')
+        # )
+    # )
+# )
+
+
 
 
 # process.TablesTask = cms.Task(process.linkedObjects, process.linkedObjectsEle, process.jetTable, process.electronTable)
 process.electronSequence = cms.Sequence(process.run3ScoutingEleToPatEle * process.electronTable)
-process.muonSequence = cms.Sequence(process.run3ScoutingMuonToPatMuon * process.muonTable)
+process.muonSequence = cms.Sequence(process.run3ScoutingMuonRecoTrack * process.run3ScoutingMuonToPatMuon * process.muonTable)
 process.jetSequence = cms.Sequence(process.run3ScoutingJetToPatJet * process.jetTable)
+# process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex * process.pvTable) + (process.run3ScoutingSVtoVertex * process.svTable))
+process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex) + (process.run3ScoutingSVtoVertex))
+
+
+process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
+    srcMuon = cms.InputTag("run3ScoutingMuonToPatMuon"),
+    pvSrc   = cms.InputTag("run3ScoutingPVtoVertex"),
+    svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    ptMin   = cms.double(0.8),
+    svName  = cms.string("muonSV"),
+)
+
+# process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex + process.run3ScoutingSVtoVertex) * process.vertexTable)
 # process.TablesTask = process.electronSequence + process.muonSequence + process.jetSequence
 
 # # # # # # # # # # updateJetCollection(
@@ -1715,6 +1908,7 @@ if options.isData:
     # Main
     process.llpnanoAOD_step_mu = cms.Path(
         process.electronSequence + process.muonSequence + process.jetSequence
+        + process.vertexSequence + process.muonVerticesTable
         # process.TablesTask
         #process.muonFilterSequence+
         # # # # process.nanoSequence+
