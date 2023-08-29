@@ -175,7 +175,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         'keep edmTriggerResults_*_*_*',
         'keep nanoaodMergeableCounterTable_*Table_*_*',
         'keep nanoaodUniqueString_nanoMetadata_*_*',
-        
+
         'drop *_caloMetTable_*_*',
         'drop *_saJetTable_*_*',
         'drop *_saTable_*_*',
@@ -190,10 +190,10 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         'drop *_tkMetTable_*_*',
         'drop *_puppiMetTable_*_*',
         'drop *_ttbarCategoryTable_*_*',
-        
+
         'drop *_rivetMetTable_*_*',
         'drop *_rivetProducerHTXS_*_*',
-        
+
         #'drop *_rivetMetTable_*_*',
     )
 )
@@ -482,7 +482,7 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
 #)
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
-    srcMuon = cms.InputTag("slimmedMuons"),
+    srcMuon = cms.InputTag("linkedObjects", "muons"),
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),

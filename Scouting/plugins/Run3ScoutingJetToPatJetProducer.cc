@@ -8,6 +8,7 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingPFJet.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
@@ -34,7 +35,8 @@ class Run3ScoutingJetToPatJetProducer: public edm::stream::EDProducer<>
 
 Run3ScoutingJetToPatJetProducer::Run3ScoutingJetToPatJetProducer(const edm::ParameterSet &iConfig) {
     jetsToken_ = consumes<edm::View<Run3ScoutingPFJet>>(iConfig.getParameter<edm::InputTag>("jetSource"));
-    produces<std::vector<pat::Jet>>();
+    produces<std::vector<pat::Jet>>("jets");
+    produces<std::vector<pat::Tau>>("taus");
 }
 
 Run3ScoutingJetToPatJetProducer::~Run3ScoutingJetToPatJetProducer() {}
@@ -44,13 +46,20 @@ void Run3ScoutingJetToPatJetProducer::produce(edm::Event &iEvent, const edm::Eve
     iEvent.getByToken(jetsToken_, jets);
 
     auto patJets = std::make_unique<std::vector<pat::Jet>>();
+    auto patTaus = std::make_unique<std::vector<pat::Tau>>();
     for (const auto &jet: *jets) {
         pat::Jet patjet;
+        pat::Tau pattau;
+
         math::PtEtaPhiMLorentzVectorD lv(jet.pt(), jet.eta(), jet.phi(), jet.m());
         patjet.setP4(lv);
+        pattau.setP4(lv);
+
         patJets->push_back(patjet);
+        patTaus->push_back(pattau);
     }
-    iEvent.put(std::move(patJets));
+    iEvent.put(std::move(patJets), "jets");
+    iEvent.put(std::move(patTaus), "taus");
 }
 
 void Run3ScoutingJetToPatJetProducer::fillDescriptions(edm::ConfigurationDescriptions &descriptions) {

@@ -153,7 +153,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     size_t nGoodSV=0;
     float muonMass=0.1057;
     const auto & PV0 = pvsIn->front();
-    std::vector<int> origIndex; 
+    std::vector<int> origIndex;
     for (size_t i = 0; i < muons->size(); i++) {
         reco::TrackRef track_i = muons->at(i).muonBestTrack();
         if (track_i.isNonnull() && track_i->pt() > ptMin_) {
@@ -162,6 +162,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             origIndex.emplace_back(i);
         }
     }
+
     std::sort(origIndex.begin(), origIndex.end(),
             [&muTracks](const int& a, const int& b)
             {
@@ -261,24 +262,24 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //
     // For SV we fill from here only stuff that cannot be created with the SimpleFlatTableProducer 
     auto svsTable = std::make_unique<nanoaod::FlatTable>(nGoodSV,svName_,false);
-    svsTable->addColumn<float>("dlen",dlen,"decay length in cm",10);
-    svsTable->addColumn<float>("dlenSig",dlenSig,"decay length significance", 10);
-    svsTable->addColumn<float>("dxy", dxy, "2D decay length in cm", 10);
-    svsTable->addColumn<float>("dxySig", dxySig, "2D decay length significance", 10);
-    svsTable->addColumn<float>("x",x,  "secondary vertex X position, in cm",10);
-    svsTable->addColumn<float>("y",y,  "secondary vertex Y position, in cm",10);
-    svsTable->addColumn<float>("z",z,  "secondary vertex Z position, in cm",14);
-    svsTable->addColumn<float>("ndof",ndof,"number of degrees of freedom",8);
-    svsTable->addColumn<float>("chi2",chi2, "reduced chi2, i.e. chi/ndof",8);
-    svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",10);
-    svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",10);
-    svsTable->addColumn<float>("mass",propMass,"mass propagated to the vertex position",10);
-    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",10);
-    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",10);
-    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",10);
-    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",10);
-    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",10);
-    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",10);
+    svsTable->addColumn<float>("dlen",dlen,"decay length in cm",20);
+    svsTable->addColumn<float>("dlenSig",dlenSig,"decay length significance", 20);
+    svsTable->addColumn<float>("dxy", dxy, "2D decay length in cm", 20);
+    svsTable->addColumn<float>("dxySig", dxySig, "2D decay length significance", 20);
+    svsTable->addColumn<float>("x",x,  "secondary vertex X position, in cm",20);
+    svsTable->addColumn<float>("y",y,  "secondary vertex Y position, in cm",20);
+    svsTable->addColumn<float>("z",z,  "secondary vertex Z position, in cm",20);
+    svsTable->addColumn<float>("ndof",ndof,"number of degrees of freedom",10);
+    svsTable->addColumn<float>("chi2",chi2, "reduced chi2, i.e. chi/ndof",10);
+    svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",20);
+    svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",20);
+    svsTable->addColumn<float>("mass",propMass,"mass propagated to the vertex position",20);
+    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",20);
+    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",20);
+    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",20);
+    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",20);
+    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",20);
+    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",20);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex");
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex");
 

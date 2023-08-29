@@ -98,7 +98,7 @@ else:
 # More options
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100000)
+    input = cms.untracked.int32(100)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -246,6 +246,9 @@ process.run3ScoutingJetToPatJet = cms.EDProducer("Run3ScoutingJetToPatJetProduce
 process.run3ScoutingEleToPatEle = cms.EDProducer("Run3ScoutingEleToPatEleProducer",
     eleSource=cms.InputTag("hltScoutingEgammaPacker"))
 
+process.run3ScoutingPhotonToPatPhoton = cms.EDProducer("Run3ScoutingPhotonToPatPhotonProducer",
+    photonSource=cms.InputTag("hltScoutingEgammaPacker"))
+
 process.run3ScoutingMuonRecoTrack = cms.EDProducer("Run3ScoutingMuonRecoTrackProducer",
     muonSource=cms.InputTag("hltScoutingMuonPacker"))
 
@@ -254,11 +257,22 @@ process.run3ScoutingMuonToPatMuon = cms.EDProducer("Run3ScoutingMuonToPatMuonPro
     trackSource=cms.InputTag("run3ScoutingMuonRecoTrack")
 )
 
-process.run3ScoutingPVtoVertex= cms.EDProducer("Run3ScoutingVtxToVtxProducer",
-    vertexSource=cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"))
+process.run3ScoutingVertices = cms.EDProducer("Run3ScoutingVtxToVtxProducer",
+    pvSource=cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+    svSource=cms.InputTag("hltScoutingMuonPacker", "displacedVtx")
+)
 
-process.run3ScoutingSVtoVertex= cms.EDProducer("Run3ScoutingVtxToVtxProducer",
-    vertexSource=cms.InputTag("hltScoutingMuonPacker", "displacedVtx"))
+# process.linkedObjects = cms.EDProducer("PATObjectCrossLinker",
+    # boostedTaus = cms.InputTag(""),
+    # electrons = cms.InputTag("run3ScoutingEleToPatEle"),
+    # jets = cms.InputTag("run3ScoutingJetToPatJet", "jets"),
+    # lowPtElectrons = cms.InputTag(""),
+    # muons = cms.InputTag("run3ScoutingMuonToPatMuon"),
+    # photons = cms.InputTag("run3ScoutingPhotonToPatPhoton"),
+    # taus = cms.InputTag("run3ScoutingJetToPatJet", "taus"),
+    # vertices = cms.InputTag("run3ScoutingVertices", "svs")
+# )
+
 
 process.jetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     cut = cms.string(''),
@@ -296,7 +310,7 @@ process.jetTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     singleton = cms.bool(False),
     skipNonExistingSrc = cms.bool(False),
     # src = cms.InputTag("linkedObjects", "jets"),
-    src = cms.InputTag("run3ScoutingJetToPatJet"),
+    src = cms.InputTag("run3ScoutingJetToPatJet", "jets"),
     variables = cms.PSet(
         area = cms.PSet(
             doc = cms.string('jet catchment area, for JECs'),
@@ -1311,11 +1325,11 @@ process.vertexTable = cms.EDProducer("VertexTableProducer",
     dlenSigMin = cms.double(3),
     goodPvCut = cms.string('!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2'),
     pvName = cms.string('PV'),
-    pvSrc = cms.InputTag("run3ScoutingPVtoVertex"),
+    pvSrc = cms.InputTag("run3ScoutingVertices", "pvs"),
     svCut = cms.string(''),
     svDoc = cms.string('secondary vertices from IVF algorithm'),
     svName = cms.string('SV'),
-    svSrc = cms.InputTag("run3ScoutingSVtoVertex")
+    svSrc = cms.InputTag("run3ScoutingVertices", "svs")
 )
 
 # process.pvTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -1476,16 +1490,16 @@ process.vertexTable = cms.EDProducer("VertexTableProducer",
 
 
 # process.TablesTask = cms.Task(process.linkedObjects, process.linkedObjectsEle, process.jetTable, process.electronTable)
-process.electronSequence = cms.Sequence(process.run3ScoutingEleToPatEle * process.electronTable)
+process.electronSequence = cms.Sequence((process.run3ScoutingEleToPatEle * process.electronTable) + process.run3ScoutingPhotonToPatPhoton)
 process.muonSequence = cms.Sequence(process.run3ScoutingMuonRecoTrack * process.run3ScoutingMuonToPatMuon * process.muonTable)
 process.jetSequence = cms.Sequence(process.run3ScoutingJetToPatJet * process.jetTable)
 # process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex * process.pvTable) + (process.run3ScoutingSVtoVertex * process.svTable))
-process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex) + (process.run3ScoutingSVtoVertex))
+process.vertexSequence = cms.Sequence(process.run3ScoutingVertices * process.vertexTable)
 
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     srcMuon = cms.InputTag("run3ScoutingMuonToPatMuon"),
-    pvSrc   = cms.InputTag("run3ScoutingPVtoVertex"),
+    pvSrc   = cms.InputTag("run3ScoutingVertices", "pvs"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
     dlenSigMin = cms.double(0),
@@ -1737,15 +1751,6 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 # # # # # # # # # # #    src = cms.InputTag("muonTrgSelector", "trgMuons")
 # # # # # # # # # # #)
 
-# # # # # # # # # # process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
-    # # # # # # # # # # srcMuon = cms.InputTag("slimmedMuons"),
-    # # # # # # # # # # pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    # # # # # # # # # # svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
-    # # # # # # # # # # dlenMin = cms.double(0),
-    # # # # # # # # # # dlenSigMin = cms.double(0),
-    # # # # # # # # # # ptMin   = cms.double(0.8),
-    # # # # # # # # # # svName  = cms.string("muonSV"),
-# # # # # # # # # # )
 
 # # # # # # # # # # # process.muonVerticesCandidateTable =  cms.EDProducer("SimpleCandidateFlatTableProducer",
 # # # # # # # # # # #     src = cms.InputTag("muonVerticesTable"),
@@ -1909,6 +1914,7 @@ if options.isData:
     process.llpnanoAOD_step_mu = cms.Path(
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable
+        # + process.linkedObjects
         # process.TablesTask
         #process.muonFilterSequence+
         # # # # process.nanoSequence+
