@@ -40,6 +40,7 @@ Run3ScoutingMuonToPatMuonProducer::Run3ScoutingMuonToPatMuonProducer(const edm::
     muonToken_ = consumes<std::vector<Run3ScoutingMuon>>(iConfig.getParameter<edm::InputTag>("muonSource"));
     trackToken_ = consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("trackSource"));
     produces<std::vector<pat::Muon>>();
+    produces<edm::ValueMap<int> >().setBranchAlias("numberofmatchedstations");
 }
 
 Run3ScoutingMuonToPatMuonProducer::~Run3ScoutingMuonToPatMuonProducer() {}
@@ -51,6 +52,8 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
     iEvent.getByToken(trackToken_, tracks);
 
     auto patMuons = std::make_unique<std::vector<pat::Muon>>();
+    std::vector<int> numberofmatchedstations;
+    numberofmatchedstations.reserve(muons->size());
     // for (const auto &muon: *muons) {
     for (unsigned int imuon = 0; imuon < muons->size(); imuon++) {
         auto muon = muons->at(imuon);
@@ -58,6 +61,12 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         math::PtEtaPhiMLorentzVectorD lv(muon.pt(), muon.eta(), muon.phi(), muon.m());
         patmuon.setP4(lv);
         patmuon.setCharge(muon.charge());
+        patmuon.setType(muon.type());
+        patmuon.setDB(muon.trk_dxy(), muon.trk_dxyError(), pat::Muon::PV2D);
+        patmuon.setDB(muon.trk_dz(), muon.trk_dzError(), pat::Muon::PVDZ);
+
+        numberofmatchedstations.push_back(muon.nRecoMuonMatchedStations());
+
 
         // std::cout << "===========================" << std::endl;
         // std::cout << muon.trk_vx() << " ";
@@ -96,7 +105,12 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         patmuon.setBestTrack(reco::Muon::MuonTrackType::InnerTrack);
         patMuons->push_back(patmuon);
     }
-    iEvent.put(std::move(patMuons));
+    auto coll = iEvent.put(std::move(patMuons));
+    auto out = std::make_unique<edm::ValueMap<int>>();
+    edm::ValueMap<int>::Filler filler(*out);
+    filler.insert(coll, numberofmatchedstations.begin(), numberofmatchedstations.end());
+    filler.fill();
+    iEvent.put(std::move(out));
 }
 
 void Run3ScoutingMuonToPatMuonProducer::fillDescriptions(edm::ConfigurationDescriptions &descriptions) {
