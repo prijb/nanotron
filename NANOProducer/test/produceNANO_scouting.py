@@ -53,6 +53,14 @@ options.register(
     "running test"
 )
 
+options.register(
+    'output',
+    '',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "output filename"
+)
+
 options.parseArguments() 
 
 if options.year == '2016':
@@ -153,6 +161,9 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # ------------------------------------------------------------------------
 # Output definition
+
+output_filename = "nano.root" if not options.output else options.output
+
 process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     compressionAlgorithm = cms.untracked.string('LZMA'),
     compressionLevel = cms.untracked.int32(9),
@@ -164,10 +175,10 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
-               ['llpnanoAOD_step_mu'] if options.isData else ['llpnanoAOD_step'] # ['llpnanoAOD_step_mu','llpnanoAOD_step_ele'] ~ boolean OR (union) between 'mu' and 'ele' paths
+               ['llpnanoAOD_step'] if options.isData else ['llpnanoAOD_step'] # ['llpnanoAOD_step_mu','llpnanoAOD_step_ele'] ~ boolean OR (union) between 'mu' and 'ele' paths
         ) #only events passing this path will be saved
     ),
-    fileName = cms.untracked.string('nano.root'),
+    fileName = cms.untracked.string(output_filename),
     #outputCommands = process.NANOAODSIMEventContent.outputCommands+cms.untracked.vstring(
     outputCommands = cms.untracked.vstring(
         'drop *',
@@ -231,6 +242,8 @@ else:
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mc2017_realistic_v8', '')
     if options.year == '2018' or options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
+    elif options.year == '2023':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2023_realistic_postBPix_v1', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None')
 
 # ------------------------------------------------------------------------
@@ -1915,7 +1928,7 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 if options.isData:
 
     # Main
-    process.llpnanoAOD_step_mu = cms.Path(
+    process.llpnanoAOD_step = cms.Path(
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable
         # + process.linkedObjects
@@ -1953,25 +1966,29 @@ if options.isData:
 else:
     # Main
     process.llpnanoAOD_step = cms.Path(
-        process.nanoSequenceMC+
-        process.adaptedVertexing+
-        process.pfOnionTagInfos+
-        process.displacedGenVertexSequence+
-
-        process.MCGenDecayInfo+
-        process.MCLabels+
-
-        process.nanoTable+
-        process.nanoGenTable
+        process.electronSequence + process.muonSequence + process.jetSequence
+        + process.vertexSequence + process.muonVerticesTable
     )
+    # # # process.llpnanoAOD_step = cms.Path(
+        # # # process.nanoSequenceMC+
+        # # # process.adaptedVertexing+
+        # # # process.pfOnionTagInfos+
+        # # # process.displacedGenVertexSequence+
+
+        # # # process.MCGenDecayInfo+
+        # # # process.MCLabels+
+
+        # # # process.nanoTable+
+        # # # process.nanoGenTable
+    # # # )
 
     # B-parking additions
-    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
+    # # # # process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
     #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
-    if options.addSignalLHE:
-        process.llpnanoAOD_step += process.lheWeightsTable
+    # if options.addSignalLHE:
+        # process.llpnanoAOD_step += process.lheWeightsTable
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
@@ -1981,7 +1998,7 @@ process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 
 if options.isData:
 #    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.llpnanoAOD_step_ele, process.endjob_step, process.NANOAODSIMoutput_step)
-    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.endjob_step, process.NANOAODSIMoutput_step)
+    process.schedule = cms.Schedule(process.llpnanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step)
 else:
     process.schedule = cms.Schedule(process.llpnanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step)
 
