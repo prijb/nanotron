@@ -736,7 +736,6 @@ modulesToRemove = [
     "rivetProducerHTXS",
     "genSubJetAK8Table",
     
-    "l1bits",
 ]
 
 #override final jets
