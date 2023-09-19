@@ -1,3 +1,5 @@
+// Taken from: https://github.com/DiElectronX/BParkingNANO/blob/main/BParkingNano/plugins/TriggerObjectTableBParkProducer.cc
+
 // system include files
 #include <memory>
 #include <sstream>
