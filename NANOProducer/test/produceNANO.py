@@ -16,7 +16,7 @@ options = VarParsing ('analysis')
 
 options.register(
     'isData',
-    False,
+    True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "is data"
@@ -32,7 +32,7 @@ options.register(
 
 options.register(
     'year',
-    '2016',
+    '2018',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "add year file"
@@ -53,10 +53,9 @@ if options.year == '2016':
 elif options.year == '2017':
     process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
 elif options.year == '2018' or options.year == '2018D':
-    process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
+    process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
 else:
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
-
 print "Selected year: ", options.year
 
 
@@ -113,7 +112,7 @@ files = {
     '2018': {
         "mc":"root://gfe02.grid.hep.ph.ic.ac.uk/pnfs/hep.ph.ic.ac.uk/data/cms/store/user/mkomm/HNL/miniaod18_200625/HNL_dirac_all_ctau1p0e-01_massHNL10p0_Vall5p262e-03/miniaod18_200625/200709_103117/0000/HNL2018_283.root",
         #"mc": "root://maite.iihe.ac.be//store/user/tomc/heavyNeutrinoMiniAOD/Autumn18/displaced/HeavyNeutrino_lljj_M-8_V-0.00214242852856_mu_Dirac_massiveAndCKM_LO/heavyNeutrino_10.root",
-        "data": "/store/data/Run2018B/SingleMuon/MINIAOD/17Sep2018-v1/60000/FF47BB90-FC1A-CC44-A635-2B8B8C64AA39.root"
+        "data": "/store/data/Run2018B/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/60000/0066281C-9A20-B246-A0E6-30D2055CF684.root"
     },
     '2018D': {
         "data": "/store/data/Run2018B/SingleMuon/MINIAOD/17Sep2018-v1/60000/FF47BB90-FC1A-CC44-A635-2B8B8C64AA39.root"
@@ -202,7 +201,7 @@ if options.isData:
     if options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
     if options.year == '2018':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '')
     if options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
