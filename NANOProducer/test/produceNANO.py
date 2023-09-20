@@ -450,6 +450,69 @@ else:
 # https://github.com/DiElectronX/BParkingNANO/blob/main/BParkingNano/python/muonsBPark_cff.py
 
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
+
+if options.year == '2023':
+    Path = [
+        'HLT_Dimuon0_Jpsi3p5_Muon2',
+        'HLT_Dimuon0_Jpsi_L1_4R_0er1p5R',
+        'HLT_Dimuon0_Jpsi_L1_NoOS',
+        'HLT_Dimuon0_Jpsi_NoVertexing_L1_4R_0er1p5R',
+        'HLT_Dimuon0_Jpsi_NoVertexing_NoOS',
+        'HLT_Dimuon0_Jpsi_NoVertexing',
+        'HLT_Dimuon0_Jpsi',
+        'HLT_Dimuon0_LowMass_L1_0er1p5R',
+        'HLT_Dimuon0_LowMass_L1_0er1p5',
+        'HLT_Dimuon0_LowMass_L1_4R',
+        'HLT_Dimuon0_LowMass_L1_4',
+        'HLT_Dimuon0_LowMass_L1_TM530',
+        'HLT_Dimuon0_LowMass',
+        'HLT_Dimuon0_Upsilon_L1_4p5',
+        'HLT_Dimuon0_Upsilon_L1_4p5er2p0M',
+        'HLT_Dimuon0_Upsilon_L1_4p5er2p0',
+        'HLT_Dimuon0_Upsilon_Muon_NoL1Mass',
+        'HLT_Dimuon0_Upsilon_NoVertexing',
+        'HLT_Dimuon10_Upsilon_y1p4',
+        'HLT_Dimuon12_Upsilon_y1p4',
+        'HLT_Dimuon14_Phi_Barrel_Seagulls',
+        'HLT_Dimuon14_PsiPrime_noCorrL1',
+        'HLT_Dimuon14_PsiPrime',
+        'HLT_Dimuon18_PsiPrime_noCorrL1',
+        'HLT_Dimuon18_PsiPrime',
+        'HLT_Dimuon24_Phi_noCorrL1',
+        'HLT_Dimuon24_Upsilon_noCorrL1',
+        'HLT_Dimuon25_Jpsi_noCorrL1',
+        'HLT_Dimuon25_Jpsi',
+        'HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05',
+        'HLT_DoubleMu3_DoubleEle7p5_CaloIdL_TrackIdL_Upsilon',
+        'HLT_DoubleMu3_TkMu_DsTau3Mu',
+        'HLT_DoubleMu3_Trk_Tau3mu_NoL1Mass',
+        'HLT_DoubleMu3_Trk_Tau3mu',
+        'HLT_DoubleMu4_3_Bs',
+        'HLT_DoubleMu4_3_Displaced_Photon4_BsToMMG',
+        'HLT_DoubleMu4_3_Jpsi',
+        'HLT_DoubleMu4_3_LowMass',
+        'HLT_DoubleMu4_3_Photon4_BsToMMG',
+        'HLT_DoubleMu4_JpsiTrkTrk_Displaced',
+        'HLT_DoubleMu4_JpsiTrk_Bc',
+        'HLT_DoubleMu4_Jpsi_Displaced',
+        'HLT_DoubleMu4_Jpsi_NoVertexing',
+        'HLT_DoubleMu4_LowMass_Displaced',
+        'HLT_DoubleMu4_MuMuTrk_Displaced',
+        'HLT_DoubleMu5_Upsilon_DoubleEle3_CaloIdL_TrackIdL',
+        'HLT_Mu25_TkMu0_Phi',
+        'HLT_Mu30_TkMu0_Psi',
+        'HLT_Mu30_TkMu0_Upsilon',
+        'HLT_Mu4_L1DoubleMu',
+        'HLT_Mu7p5_L2Mu2_Jpsi',
+        'HLT_Mu7p5_L2Mu2_Upsilon',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_Tau15_Charge1',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_Tau15',
+        'HLT_Trimuon5_3p5_2_Upsilon_Muon',
+        'HLT_TrimuonOpen_5_3p5_2_Upsilon_Muon'
+    ]
+
 #Path=["HLT_Mu9_IP6"]
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
@@ -555,18 +618,22 @@ process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         matched_dpt = Var("userFloat('DPT')",float,doc="dpt/pt with the matched triggering muon" ),        #comma
         skipMuon = Var("userInt('skipMuon')",bool,doc="Is muon skipped (due to large dZ w.r.t. trigger)?"),
         looseId = Var("userInt('looseId')",int,doc="reco muon is Loose"),
-        fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8_IP3 = Var("userInt('HLT_Mu8_IP3')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8p5_IP3p5 = Var("userInt('HLT_Mu8p5_IP3p5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu9_IP6 = Var("userInt('HLT_Mu9_IP6')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu9_IP5 = Var("userInt('HLT_Mu9_IP5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6')",int,doc="reco muon fired this trigger")#,
+        # fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8_IP3 = Var("userInt('HLT_Mu8_IP3')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8p5_IP3p5 = Var("userInt('HLT_Mu8p5_IP3p5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu9_IP6 = Var("userInt('HLT_Mu9_IP6')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu9_IP5 = Var("userInt('HLT_Mu9_IP5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6')",int,doc="reco muon fired this trigger")#,
     ),
 )
+
+for p in Path:
+    setattr(process.muonBParkTable.variables, "fired_%s" % p, Var("userInt('%s')" % p, int, doc="reco muon fired this trigger"))
+
 
 """
 process.muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher", # cut on deltaR, deltaPt/Pt; pick best by deltaR

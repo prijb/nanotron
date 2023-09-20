@@ -53,6 +53,14 @@ options.register(
     "running test"
 )
 
+options.register(
+    'output',
+    '',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "output filename"
+)
+
 options.parseArguments() 
 
 if options.year == '2016':
@@ -153,6 +161,9 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # ------------------------------------------------------------------------
 # Output definition
+
+output_filename = "nano.root" if not options.output else options.output
+
 process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     compressionAlgorithm = cms.untracked.string('LZMA'),
     compressionLevel = cms.untracked.int32(9),
@@ -164,10 +175,10 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
-               ['llpnanoAOD_step_mu'] if options.isData else ['llpnanoAOD_step'] # ['llpnanoAOD_step_mu','llpnanoAOD_step_ele'] ~ boolean OR (union) between 'mu' and 'ele' paths
+               ['llpnanoAOD_step'] if options.isData else ['llpnanoAOD_step'] # ['llpnanoAOD_step_mu','llpnanoAOD_step_ele'] ~ boolean OR (union) between 'mu' and 'ele' paths
         ) #only events passing this path will be saved
     ),
-    fileName = cms.untracked.string('nano.root'),
+    fileName = cms.untracked.string(output_filename),
     #outputCommands = process.NANOAODSIMEventContent.outputCommands+cms.untracked.vstring(
     outputCommands = cms.untracked.vstring(
         'drop *',
@@ -227,10 +238,14 @@ if options.isData:
 else:
     if options.year == '2016':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mcRun2_asymptotic_v8', '')
-    if options.year == '2017':
+    elif options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mc2017_realistic_v8', '')
-    if options.year == '2018' or options.year == '2018D':
+    elif options.year == '2018' or options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
+    elif options.year == '2022':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2022_realistic_postEE_v1', '')
+    elif options.year == '2023':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2023_realistic_postBPix_v1', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None')
 
 # ------------------------------------------------------------------------
@@ -1511,6 +1526,35 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSV"),
 )
 
+process.prunedGenParticles = cms.EDProducer(
+    "GenParticlePruner",
+    src = cms.InputTag("genParticles"),
+    select = cms.vstring(
+    "drop  *  ", # this is the default
+    "keep++ pdgId = {Z0}",
+    "drop pdgId = {Z0} & status = 2"
+    )
+)
+
+process.finalGenParticles = cms.EDProducer("GenParticlePruner",
+    select = cms.vstring(
+        'drop *',
+        'keep++ abs(pdgId) == 15 & (pt > 15 ||  isPromptDecayed() )',
+        'keep+ abs(pdgId) == 15 ',
+        '+keep pdgId == 22 && status == 1 && (pt > 10 || isPromptFinalState())',
+        '+keep abs(pdgId) == 11 || abs(pdgId) == 13 || abs(pdgId) == 15',
+        'drop abs(pdgId)= 2212 && abs(pz) > 1000',
+        'keep (400 < abs(pdgId) < 600) || (4000 < abs(pdgId) < 6000)',
+        'keep abs(pdgId) == 12 || abs(pdgId) == 14 || abs(pdgId) == 16',
+        'keep status == 3 || (status > 20 && status < 30)',
+        'keep isHardProcess() ||  fromHardProcessDecayed()  || fromHardProcessFinalState() || (statusFlags().fromHardProcess() && statusFlags().isLastCopy())',
+        'keep  (status > 70 && status < 80 && pt > 15) ',
+        'keep abs(pdgId) == 23 || abs(pdgId) == 24 || abs(pdgId) == 25 || abs(pdgId) == 37 ',
+        'keep (1000001 <= abs(pdgId) <= 1000039 ) || ( 2000001 <= abs(pdgId) <= 2000015)'
+    ),
+    src = cms.InputTag("prunedGenParticles")
+)
+
 # process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex + process.run3ScoutingSVtoVertex) * process.vertexTable)
 # process.TablesTask = process.electronSequence + process.muonSequence + process.jetSequence
 
@@ -1912,10 +1956,11 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 # ** DATA SEQUENCE **
 # ========================================================================
 
+
 if options.isData:
 
     # Main
-    process.llpnanoAOD_step_mu = cms.Path(
+    process.llpnanoAOD_step = cms.Path(
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable
         # + process.linkedObjects
@@ -1953,25 +1998,31 @@ if options.isData:
 else:
     # Main
     process.llpnanoAOD_step = cms.Path(
-        process.nanoSequenceMC+
-        process.adaptedVertexing+
-        process.pfOnionTagInfos+
-        process.displacedGenVertexSequence+
-
-        process.MCGenDecayInfo+
-        process.MCLabels+
-
-        process.nanoTable+
-        process.nanoGenTable
+        process.electronSequence + process.muonSequence + process.jetSequence
+        + process.vertexSequence + process.muonVerticesTable
     )
+    # # # process.llpnanoAOD_step = cms.Path(
+        # # # process.nanoSequenceMC+
+        # # # process.adaptedVertexing+
+        # # # process.pfOnionTagInfos+
+        # # # process.displacedGenVertexSequence+
+
+        # # # process.MCGenDecayInfo+
+        # # # process.MCLabels+
+
+        # # # process.nanoTable+
+        # # # process.nanoGenTable
+    # # # )
 
     # B-parking additions
-    process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
+    # # # # process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
     #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
-    if options.addSignalLHE:
-        process.llpnanoAOD_step += process.lheWeightsTable
+    # # # if options.addSignalLHE:
+        # # # process.llpnanoAOD_step += process.lheWeightsTable
+    process.finalGenParticlesTask = cms.Task(process.prunedGenParticles, process.finalGenParticles)
+    process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask)
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
@@ -1981,9 +2032,9 @@ process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 
 if options.isData:
 #    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.llpnanoAOD_step_ele, process.endjob_step, process.NANOAODSIMoutput_step)
-    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.endjob_step, process.NANOAODSIMoutput_step)
-else:
     process.schedule = cms.Schedule(process.llpnanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step)
+else:
+    process.schedule = cms.Schedule(process.llpnanoAOD_step, process.mc_path, process.endjob_step, process.NANOAODSIMoutput_step)
 
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
@@ -2044,9 +2095,9 @@ modulesToRemove = [
 #process.finalPhotons.cut = cms.string("pt > 5")
 #process.finalPhotons.src = cms.InputTag("slimmedPhotons")
 
-# # # # # # # # # # process.genParticleTable.variables.vertex_x = Var("vertex().x()", float, doc="vertex x position")
-# # # # # # # # # # process.genParticleTable.variables.vertex_y = Var("vertex().y()", float, doc="vertex y position")
-# # # # # # # # # # process.genParticleTable.variables.vertex_z = Var("vertex().z()", float, doc="vertex z position")
+process.genParticleTable.variables.vertex_x = Var("vertex().x()", float, doc="vertex x position")
+process.genParticleTable.variables.vertex_y = Var("vertex().y()", float, doc="vertex y position")
+process.genParticleTable.variables.vertex_z = Var("vertex().z()", float, doc="vertex z position")
 
 '''
 process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
