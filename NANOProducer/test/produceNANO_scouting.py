@@ -1956,11 +1956,17 @@ process.finalGenParticles = cms.EDProducer("GenParticlePruner",
 # ** DATA SEQUENCE **
 # ========================================================================
 
+process.load("EventFilter.L1TRawToDigi.gtStage2Digis_cfi")
+process.gtStage2Digis.InputLabel = cms.InputTag( "hltFEDSelectorL1" )
+
+from PhysicsTools.NanoAOD.triggerObjects_cff import l1bits
+
 
 if options.isData:
 
     # Main
     process.llpnanoAOD_step = cms.Path(
+        process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable
         # + process.linkedObjects
@@ -1998,6 +2004,7 @@ if options.isData:
 else:
     # Main
     process.llpnanoAOD_step = cms.Path(
+        process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable
     )
@@ -2021,6 +2028,7 @@ else:
     # LHE
     # # # if options.addSignalLHE:
         # # # process.llpnanoAOD_step += process.lheWeightsTable
+
     process.finalGenParticlesTask = cms.Task(process.prunedGenParticles, process.finalGenParticles)
     process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask)
 
@@ -2029,6 +2037,7 @@ process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 
 # ------------------------------------------------------------------------
 # Sequence
+
 
 if options.isData:
 #    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.llpnanoAOD_step_ele, process.endjob_step, process.NANOAODSIMoutput_step)
@@ -2072,7 +2081,7 @@ modulesToRemove = [
     "rivetProducerHTXS",
     "genSubJetAK8Table",
     
-    "l1bits",
+    # "l1bits",
 ]
 
 #override final jets
