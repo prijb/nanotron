@@ -451,7 +451,7 @@ else:
 
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
-if options.year == '2023':
+if options.year in ['2022', '2023']:
     Path = [
         'HLT_Dimuon0_Jpsi3p5_Muon2',
         'HLT_Dimuon0_Jpsi_L1_4R_0er1p5R',
