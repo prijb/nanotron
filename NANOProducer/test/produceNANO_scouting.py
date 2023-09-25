@@ -279,6 +279,12 @@ process.run3ScoutingVertices = cms.EDProducer("Run3ScoutingVtxToVtxProducer",
     muonSource=cms.InputTag("hltScoutingMuonPacker")
 )
 
+process.run3ScoutingParticles = cms.EDProducer("Run3ScoutingPFToCandidateProducer",
+    vertexSource=cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+    particleSource=cms.InputTag("hltScoutingPFPacker")
+)
+
+
 # process.linkedObjects = cms.EDProducer("PATObjectCrossLinker",
     # boostedTaus = cms.InputTag(""),
     # electrons = cms.InputTag("run3ScoutingEleToPatEle"),
@@ -1525,7 +1531,65 @@ process.svTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 )
 
 
+process.pfparticleTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    cut = cms.string(''),
+    doc = cms.string(''),
+    extension = cms.bool(False),
+    externalVariables = cms.PSet(
 
+    ),
+    maxLen = cms.optional.uint32,
+    mightGet = cms.optional.untracked.vstring,
+    name = cms.string('pfpart'),
+    singleton = cms.bool(False),
+    skipNonExistingSrc = cms.bool(False),
+    # src = cms.InputTag("run3ScoutingVertices", "svs"),
+    src = cms.InputTag("run3ScoutingParticles"),
+    variables = cms.PSet(
+        eta = cms.PSet(
+            doc = cms.string('eta'),
+            expr = cms.string('eta'),
+            precision = cms.int32(12),
+            type = cms.string('float')
+        ),
+        phi = cms.PSet(
+            doc = cms.string('phi'),
+            expr = cms.string('phi'),
+            precision = cms.int32(12),
+            type = cms.string('float')
+        ),
+        pt = cms.PSet(
+            doc = cms.string('pt'),
+            expr = cms.string('pt'),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        x = cms.PSet(
+            doc = cms.string('primary vertex X position, in cm'),
+            expr = cms.string('vx'),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        y = cms.PSet(
+            doc = cms.string('primary vertex Y position, in cm'),
+            expr = cms.string('vy'),
+            precision = cms.int32(10),
+            type = cms.string('float')
+        ),
+        z = cms.PSet(
+            doc = cms.string('primary vertex Z position, in cm'),
+            expr = cms.string('vz'),
+            precision = cms.int32(14),
+            type = cms.string('float')
+        ),
+        pdgId = cms.PSet(
+            doc = cms.string('pdgId'),
+            expr = cms.string('pdgId'),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        )
+    )
+)
 
 # process.TablesTask = cms.Task(process.linkedObjects, process.linkedObjectsEle, process.jetTable, process.electronTable)
 process.electronSequence = cms.Sequence((process.run3ScoutingEleToPatEle * process.electronTable) + process.run3ScoutingPhotonToPatPhoton)
@@ -1533,6 +1597,7 @@ process.muonSequence = cms.Sequence(process.run3ScoutingMuonRecoTrack * process.
 process.jetSequence = cms.Sequence(process.run3ScoutingJetToPatJet * process.jetTable)
 # process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex * process.pvTable) + (process.run3ScoutingSVtoVertex * process.svTable))
 process.vertexSequence = cms.Sequence(process.run3ScoutingVertices * process.vertexTable * (process.svTable))
+process.particleSequence = cms.Sequence(process.run3ScoutingParticles * process.pfparticleTable)
 
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
@@ -1987,7 +2052,7 @@ if options.isData:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable
+        + process.vertexSequence + process.muonVerticesTable + process.particleSequence
         # + process.linkedObjects
         # process.TablesTask
         #process.muonFilterSequence+
@@ -2025,7 +2090,7 @@ else:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable
+        + process.vertexSequence + process.muonVerticesTable + process.particleSequence
     )
     # # # process.llpnanoAOD_step = cms.Path(
         # # # process.nanoSequenceMC+
