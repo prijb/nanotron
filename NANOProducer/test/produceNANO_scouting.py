@@ -148,7 +148,8 @@ if len(options.inputFiles) > 0:
     )
 else:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        #fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        fileNames = cms.untracked.vstring()
     )
 
 # ------------------------------------------------------------------------
