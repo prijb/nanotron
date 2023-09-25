@@ -1334,7 +1334,25 @@ process.muonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             expr = cms.string('1'),
             precision = cms.int32(6),
             type = cms.string('float')
-        )
+        ),
+        vx = cms.PSet(
+            doc = cms.string('Vertex x'),
+            expr = cms.string('track().vx()'),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
+        vy = cms.PSet(
+            doc = cms.string('Vertex y'),
+            expr = cms.string('track().vy()'),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
+        vz = cms.PSet(
+            doc = cms.string('Vertex z'),
+            expr = cms.string('track().vz()'),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
     )
 )
 
