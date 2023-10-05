@@ -65,7 +65,7 @@ void Run3ScoutingMuonRecoTrackProducer::produce(edm::Event &iEvent, const edm::E
         cov(2, 3) = muon.trk_phi_dxy_cov();
         cov(2, 4) = muon.trk_phi_dsz_cov();
         cov(3, 4) = muon.trk_dxy_dsz_cov();
-        reco::Track trk(muon.trk_chi2(), muon.trk_ndof(), v, p, -1, cov);
+        reco::Track trk(muon.trk_chi2(), muon.trk_ndof(), v, p, muon.charge(), cov);
         recoTracks->push_back(trk);
     }
     iEvent.put(std::move(recoTracks));
