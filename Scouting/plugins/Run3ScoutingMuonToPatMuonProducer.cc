@@ -40,7 +40,7 @@ Run3ScoutingMuonToPatMuonProducer::Run3ScoutingMuonToPatMuonProducer(const edm::
     muonToken_ = consumes<std::vector<Run3ScoutingMuon>>(iConfig.getParameter<edm::InputTag>("muonSource"));
     trackToken_ = consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("trackSource"));
     produces<std::vector<pat::Muon>>();
-    produces<edm::ValueMap<int> >().setBranchAlias("numberofmatchedstations");
+    //produces<edm::ValueMap<int>>("numberofmatchedstations");
 }
 
 Run3ScoutingMuonToPatMuonProducer::~Run3ScoutingMuonToPatMuonProducer() {}
@@ -65,7 +65,7 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         patmuon.setDB(muon.trk_dxy(), muon.trk_dxyError(), pat::Muon::PV2D);
         patmuon.setDB(muon.trk_dz(), muon.trk_dzError(), pat::Muon::PVDZ);
 
-        numberofmatchedstations.push_back(muon.nRecoMuonMatchedStations());
+        //numberofmatchedstations.push_back(muon.nRecoMuonMatchedStations());
 
 
         // std::cout << "===========================" << std::endl;
@@ -103,14 +103,35 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         edm::Ref<reco::TrackCollection> myRefTrack(tracks, imuon);
         patmuon.setTrack(myRefTrack);
         patmuon.setBestTrack(reco::Muon::MuonTrackType::InnerTrack);
+
+        patmuon.addUserInt("numberofmatchedstations", muon.nRecoMuonMatchedStations());
+        patmuon.addUserFloat("normalizedChi2", muon.normalizedChi2());
+        patmuon.addUserFloat("ecalIso", muon.ecalIso());
+        patmuon.addUserFloat("hcalIso", muon.hcalIso());
+        patmuon.addUserFloat("trackIso", muon.trackIso());
+        patmuon.addUserInt("nValidStandAloneMuonHits", muon.nValidStandAloneMuonHits());
+        patmuon.addUserInt("nStandAloneMuonMatchedStations", muon.nStandAloneMuonMatchedStations());
+        patmuon.addUserInt("nValidRecoMuonHits", muon.nValidRecoMuonHits());
+        patmuon.addUserInt("nRecoMuonChambers", muon.nRecoMuonChambers());
+        patmuon.addUserInt("nRecoMuonChambersCSCorDT", muon.nRecoMuonChambersCSCorDT());
+        patmuon.addUserInt("nRecoMuonMatches", muon.nRecoMuonMatches());
+        patmuon.addUserInt("nRecoMuonMatchedStations", muon.nRecoMuonMatchedStations());
+        patmuon.addUserInt("nRecoMuonExpectedMatchedStations", muon.nRecoMuonExpectedMatchedStations());
+        patmuon.addUserInt("recoMuonStationMask", muon.recoMuonStationMask());
+        patmuon.addUserInt("nRecoMuonMatchedRPCLayers", muon.nRecoMuonMatchedRPCLayers());
+        patmuon.addUserInt("recoMuonRPClayerMask", muon.recoMuonRPClayerMask());
+        patmuon.addUserInt("nValidPixelHits", muon.nValidPixelHits());
+        patmuon.addUserInt("nValidStripHits", muon.nValidStripHits());
+        patmuon.addUserInt("nPixelLayersWithMeasurement", muon.nPixelLayersWithMeasurement());
+        patmuon.addUserInt("nTrackerLayersWithMeasurement", muon.nTrackerLayersWithMeasurement());
         patMuons->push_back(patmuon);
     }
     auto coll = iEvent.put(std::move(patMuons));
-    auto out = std::make_unique<edm::ValueMap<int>>();
-    edm::ValueMap<int>::Filler filler(*out);
-    filler.insert(coll, numberofmatchedstations.begin(), numberofmatchedstations.end());
-    filler.fill();
-    iEvent.put(std::move(out));
+    //auto out = std::make_unique<edm::ValueMap<int>>();
+    //edm::ValueMap<int>::Filler filler(*out);
+    //filler.insert(coll, numberofmatchedstations.begin(), numberofmatchedstations.end());
+    //filler.fill();
+    //iEvent.put(std::move(out), "numberofmatchedstations");
 }
 
 void Run3ScoutingMuonToPatMuonProducer::fillDescriptions(edm::ConfigurationDescriptions &descriptions) {
