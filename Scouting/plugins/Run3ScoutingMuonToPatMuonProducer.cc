@@ -159,6 +159,7 @@ void Run3ScoutingMuonToPatMuonProducer::fillDescriptions(edm::ConfigurationDescr
 
   // input source
   iDesc.add<edm::InputTag>("muonSource", edm::InputTag("no default"))->setComment("input collection");
+  iDesc.add<edm::InputTag>("particleSource", edm::InputTag("no default"))->setComment("input collection");
   iDesc.add<edm::InputTag>("trackSource", edm::InputTag("no default"))->setComment("input collection");
 
   descriptions.add("Run3ScoutingMuonToPatMuonProducer", iDesc);
