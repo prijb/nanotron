@@ -106,7 +106,7 @@ else:
 # More options
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -1205,7 +1205,6 @@ process.muonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         nStations = cms.PSet(
             doc = cms.string('number of matched stations with default arbitration (segment & track)'),
             # expr = cms.string("userInt('numberofmatchedstations')"),
-            # expr = cms.string("numberofmatchedstations"),
             expr = cms.string("1"),
             precision = cms.int32(-1),
             type = cms.string('uint8')
@@ -1359,6 +1358,121 @@ process.muonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             expr = cms.string('track().vz()'),
             precision = cms.int32(20),
             type = cms.string('float')
+        ),
+        # scouting variables
+        normalizedChi2 = cms.PSet(
+            doc = cms.string('normalizedChi2'),
+            expr = cms.string("userFloat('normalizedChi2')"),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
+        ecalIso = cms.PSet(
+            doc = cms.string('ecalIso'),
+            expr = cms.string("userFloat('ecalIso')"),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
+        hcalIso = cms.PSet(
+            doc = cms.string('hcalIso'),
+            expr = cms.string("userFloat('hcalIso')"),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
+        trackIso = cms.PSet(
+            doc = cms.string('trackIso'),
+            expr = cms.string("userFloat('trackIso')"),
+            precision = cms.int32(20),
+            type = cms.string('float')
+        ),
+        nValidStandAloneMuonHits = cms.PSet(
+            doc = cms.string('nValidStandAloneMuonHits'),
+            expr = cms.string("userInt('nValidStandAloneMuonHits')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nStandAloneMuonMatchedStations = cms.PSet(
+            doc = cms.string('nStandAloneMuonMatchedStations'),
+            expr = cms.string("userInt('nStandAloneMuonMatchedStations')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nValidRecoMuonHits = cms.PSet(
+            doc = cms.string('nValidRecoMuonHits'),
+            expr = cms.string("userInt('nValidRecoMuonHits')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nRecoMuonChambers = cms.PSet(
+            doc = cms.string('nRecoMuonChambers'),
+            expr = cms.string("userInt('nRecoMuonChambers')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nRecoMuonChambersCSCorDT = cms.PSet(
+            doc = cms.string('nRecoMuonChambersCSCorDT'),
+            expr = cms.string("userInt('nRecoMuonChambersCSCorDT')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nRecoMuonMatches = cms.PSet(
+            doc = cms.string('nRecoMuonMatches'),
+            expr = cms.string("userInt('nRecoMuonMatches')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nRecoMuonMatchedStations = cms.PSet(
+            doc = cms.string('nRecoMuonMatchedStations'),
+            expr = cms.string("userInt('nRecoMuonMatchedStations')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nRecoMuonExpectedMatchedStations = cms.PSet(
+            doc = cms.string('nRecoMuonExpectedMatchedStations'),
+            expr = cms.string("userInt('nRecoMuonExpectedMatchedStations')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        recoMuonStationMask = cms.PSet(
+            doc = cms.string('recoMuonStationMask'),
+            expr = cms.string("userInt('recoMuonStationMask')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nRecoMuonMatchedRPCLayers = cms.PSet(
+            doc = cms.string('nRecoMuonMatchedRPCLayers'),
+            expr = cms.string("userInt('nRecoMuonMatchedRPCLayers')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        recoMuonRPClayerMask = cms.PSet(
+            doc = cms.string('recoMuonRPClayerMask'),
+            expr = cms.string("userInt('recoMuonRPClayerMask')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nValidPixelHits = cms.PSet(
+            doc = cms.string('nValidPixelHits'),
+            expr = cms.string("userInt('nValidPixelHits')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nValidStripHits = cms.PSet(
+            doc = cms.string('nValidStripHits'),
+            expr = cms.string("userInt('nValidStripHits')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nPixelLayersWithMeasurement = cms.PSet(
+            doc = cms.string('nPixelLayersWithMeasurement'),
+            expr = cms.string("userInt('nPixelLayersWithMeasurement')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        nTrackerLayersWithMeasurement = cms.PSet(
+            doc = cms.string('nTrackerLayersWithMeasurement'),
+            expr = cms.string("userInt('nTrackerLayersWithMeasurement')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
         ),
     )
 )
