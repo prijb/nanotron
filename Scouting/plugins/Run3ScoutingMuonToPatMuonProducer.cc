@@ -10,7 +10,9 @@
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/Candidate/interface/CompositeCandidate.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingMuon.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -33,11 +35,13 @@ class Run3ScoutingMuonToPatMuonProducer: public edm::stream::EDProducer<>
 
     private:
         edm::EDGetTokenT<std::vector<Run3ScoutingMuon>> muonToken_;
+        edm::EDGetTokenT<std::vector<Run3ScoutingParticle>> particleToken_;
         edm::EDGetTokenT<std::vector<reco::Track>> trackToken_;
 };
 
 Run3ScoutingMuonToPatMuonProducer::Run3ScoutingMuonToPatMuonProducer(const edm::ParameterSet &iConfig) {
     muonToken_ = consumes<std::vector<Run3ScoutingMuon>>(iConfig.getParameter<edm::InputTag>("muonSource"));
+    particleToken_ = consumes<std::vector<Run3ScoutingParticle>>(iConfig.getParameter<edm::InputTag>("particleSource"));
     trackToken_ = consumes<std::vector<reco::Track>>(iConfig.getParameter<edm::InputTag>("trackSource"));
     produces<std::vector<pat::Muon>>();
     //produces<edm::ValueMap<int>>("numberofmatchedstations");
@@ -48,6 +52,8 @@ Run3ScoutingMuonToPatMuonProducer::~Run3ScoutingMuonToPatMuonProducer() {}
 void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {
     edm::Handle<std::vector<Run3ScoutingMuon>> muons;
     iEvent.getByToken(muonToken_, muons);
+    edm::Handle<std::vector<Run3ScoutingParticle>> pfcands;
+    iEvent.getByToken(particleToken_, pfcands);
     edm::Handle<std::vector<reco::Track>> tracks;
     iEvent.getByToken(trackToken_, tracks);
 
@@ -58,13 +64,25 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
     for (unsigned int imuon = 0; imuon < muons->size(); imuon++) {
         auto muon = muons->at(imuon);
         pat::Muon patmuon;
+        float isPFmatched;
+        int n_match = 0;
         math::PtEtaPhiMLorentzVectorD lv(muon.pt(), muon.eta(), muon.phi(), muon.m());
         patmuon.setP4(lv);
         patmuon.setCharge(muon.charge());
         patmuon.setType(muon.type());
         patmuon.setDB(muon.trk_dxy(), muon.trk_dxyError(), pat::Muon::PV2D);
         patmuon.setDB(muon.trk_dz(), muon.trk_dzError(), pat::Muon::PVDZ);
-
+        //Do matching with PF candidates
+        for (auto &pf: *pfcands){
+            float dR;
+            if(TMath::Abs(pf.pdgId())!=13) continue;
+            else{
+                dR = std::sqrt(std::pow((muon.eta() - pf.eta()),2) + std::pow((muon.phi() - pf.phi()),2));
+                if(dR<0.01) n_match++;
+            }
+        }
+        if (n_match>0) isPFmatched = 1;
+        else isPFmatched = 0; 
         //numberofmatchedstations.push_back(muon.nRecoMuonMatchedStations());
 
 
@@ -104,6 +122,7 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         patmuon.setTrack(myRefTrack);
         patmuon.setBestTrack(reco::Muon::MuonTrackType::InnerTrack);
 
+        patmuon.addUserInt("isPFmatched", isPFmatched);
         patmuon.addUserInt("numberofmatchedstations", muon.nRecoMuonMatchedStations());
         patmuon.addUserFloat("normalizedChi2", muon.normalizedChi2());
         patmuon.addUserFloat("ecalIso", muon.ecalIso());
@@ -140,6 +159,7 @@ void Run3ScoutingMuonToPatMuonProducer::fillDescriptions(edm::ConfigurationDescr
 
   // input source
   iDesc.add<edm::InputTag>("muonSource", edm::InputTag("no default"))->setComment("input collection");
+  iDesc.add<edm::InputTag>("particleSource", edm::InputTag("no default"))->setComment("input collection");
   iDesc.add<edm::InputTag>("trackSource", edm::InputTag("no default"))->setComment("input collection");
 
   descriptions.add("Run3ScoutingMuonToPatMuonProducer", iDesc);

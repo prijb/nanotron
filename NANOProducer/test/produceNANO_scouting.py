@@ -104,9 +104,9 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -148,7 +148,8 @@ if len(options.inputFiles) > 0:
     )
 else:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        #fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        fileNames = cms.untracked.vstring()
     )
 
 # ------------------------------------------------------------------------
@@ -269,6 +270,7 @@ process.run3ScoutingMuonRecoTrack = cms.EDProducer("Run3ScoutingMuonRecoTrackPro
 
 process.run3ScoutingMuonToPatMuon = cms.EDProducer("Run3ScoutingMuonToPatMuonProducer",
     muonSource=cms.InputTag("hltScoutingMuonPacker"),
+    particleSource=cms.InputTag("hltScoutingPFPacker"),
     trackSource=cms.InputTag("run3ScoutingMuonRecoTrack")
 )
 
@@ -278,10 +280,10 @@ process.run3ScoutingVertices = cms.EDProducer("Run3ScoutingVtxToVtxProducer",
     muonSource=cms.InputTag("hltScoutingMuonPacker")
 )
 
-process.run3ScoutingParticles = cms.EDProducer("Run3ScoutingPFToCandidateProducer",
-    vertexSource=cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
-    particleSource=cms.InputTag("hltScoutingPFPacker")
-)
+#process.run3ScoutingParticles = cms.EDProducer("Run3ScoutingPFToCandidateProducer",
+#    vertexSource=cms.InputTag("hltScoutingPrimaryVertexPacker", "primaryVtx"),
+#    particleSource=cms.InputTag("hltScoutingPFPacker")
+#)
 
 
 # process.linkedObjects = cms.EDProducer("PATObjectCrossLinker",
@@ -1203,8 +1205,8 @@ process.muonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         ),
         nStations = cms.PSet(
             doc = cms.string('number of matched stations with default arbitration (segment & track)'),
-            # expr = cms.string("userInt('numberofmatchedstations')"),
-            expr = cms.string("1"),
+            expr = cms.string("userInt('numberofmatchedstations')"),
+            #expr = cms.string("1"),
             precision = cms.int32(-1),
             type = cms.string('uint8')
         ),
@@ -1359,6 +1361,12 @@ process.muonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             type = cms.string('float')
         ),
         # scouting variables
+        isPFmatched = cms.PSet(
+            doc = cms.string('muon is PF matched'),
+            expr = cms.string("userInt('isPFmatched')"),
+            precision = cms.int32(-1),
+            type = cms.string('bool')
+        ),
         normalizedChi2 = cms.PSet(
             doc = cms.string('normalizedChi2'),
             expr = cms.string("userFloat('normalizedChi2')"),
@@ -1643,7 +1651,7 @@ process.svTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     )
 )
 
-
+"""
 process.pfparticleTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     cut = cms.string(''),
     doc = cms.string(''),
@@ -1703,6 +1711,7 @@ process.pfparticleTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         )
     )
 )
+"""
 
 # process.TablesTask = cms.Task(process.linkedObjects, process.linkedObjectsEle, process.jetTable, process.electronTable)
 process.electronSequence = cms.Sequence((process.run3ScoutingEleToPatEle * process.electronTable) + process.run3ScoutingPhotonToPatPhoton)
@@ -1710,7 +1719,7 @@ process.muonSequence = cms.Sequence(process.run3ScoutingMuonRecoTrack * process.
 process.jetSequence = cms.Sequence(process.run3ScoutingJetToPatJet * process.jetTable)
 # process.vertexSequence = cms.Sequence((process.run3ScoutingPVtoVertex * process.pvTable) + (process.run3ScoutingSVtoVertex * process.svTable))
 process.vertexSequence = cms.Sequence(process.run3ScoutingVertices * process.vertexTable * (process.svTable))
-process.particleSequence = cms.Sequence(process.run3ScoutingParticles * process.pfparticleTable)
+#process.particleSequence = cms.Sequence(process.run3ScoutingParticles * process.pfparticleTable)
 
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
@@ -2165,7 +2174,8 @@ if options.isData:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable + process.particleSequence
+        + process.vertexSequence + process.muonVerticesTable
+        #+ process.vertexSequence + process.muonVerticesTable + process.particleSequence
         # + process.linkedObjects
         # process.TablesTask
         #process.muonFilterSequence+
@@ -2203,7 +2213,8 @@ else:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable + process.particleSequence
+        + process.vertexSequence + process.muonVerticesTable
+        #+ process.vertexSequence + process.muonVerticesTable + process.particleSequence
     )
     # # # process.llpnanoAOD_step = cms.Path(
         # # # process.nanoSequenceMC+

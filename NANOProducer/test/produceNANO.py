@@ -96,9 +96,9 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -134,14 +134,17 @@ files = {
     }
 }
 
+
 if len(options.inputFiles) > 0:
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(options.inputFiles)
     )
 else:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        #fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        fileNames = cms.untracked.vstring()
     )
+
 
 # ------------------------------------------------------------------------
 # Production Info

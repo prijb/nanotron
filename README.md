@@ -57,8 +57,9 @@ cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/mc/RunIIAutum
 
 cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2018B/ParkingBPH1/MINIAOD/05May2019-v2/230000/00496A25-08B6-FB4E-9681-D5FF4E1BE81F.root year=2018 test=True isData=True
 
-cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2023C/ParkingLLP/MINIAOD/PromptReco-v3/000/367/661/00000/0417d706-ded1-4f84-862f-f6a27f6c501e.root year=2023 isData=True
+cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2023C/ParkingDoubleMuonLowMass0/MINIAOD/PromptReco-v4/000/367/770/00000/1d32e33a-afa7-45ba-b1c1-a68b9be0409f.root year=2023 isData=True
 
+cmsRun nanotron/NANOProducer/test/produceNANO_scouting.py inputFiles=file:/vols/cms/pb4918/StoreNTuple/Scouting/2022FSample.root year=2022 isData=True
 ```
 
 Test the custom NanoAOD tree (TBD)
