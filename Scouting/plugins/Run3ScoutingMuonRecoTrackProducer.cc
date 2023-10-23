@@ -67,8 +67,9 @@ void Run3ScoutingMuonRecoTrackProducer::produce(edm::Event &iEvent, const edm::E
         cov(2, 2) = muon.trk_phiError();
         cov(2, 3) = muon.trk_phi_dxy_cov();
         cov(2, 4) = muon.trk_phi_dsz_cov();
-        cov(3, 3) = muon.trk_dszError();
+        cov(3, 3) = muon.trk_dxyError();
         cov(3, 4) = muon.trk_dxy_dsz_cov();
+        cov(4, 4) = muon.trk_dszError();
         reco::Track trk(muon.trk_chi2(), muon.trk_ndof(), v, p, muon.charge(), cov);
 
         for (auto &hit : muon.trk_hitPattern().hitPattern) {
