@@ -55,21 +55,21 @@ void Run3ScoutingMuonRecoTrackProducer::produce(edm::Event &iEvent, const edm::E
         for (auto i = 0; i < 15; i++)
             vec[i] = 1.;
         reco::TrackBase::CovarianceMatrix cov(vec, vec + 15);
-        cov(0, 0) = muon.trk_qoverpError();
+        cov(0, 0) = std::pow(muon.trk_qoverpError(),2);
         cov(0, 1) = muon.trk_qoverp_lambda_cov();
         cov(0, 2) = muon.trk_qoverp_phi_cov();
         cov(0, 3) = muon.trk_qoverp_dxy_cov();
         cov(0, 4) = muon.trk_qoverp_dsz_cov();
-        cov(1, 1) = muon.trk_lambdaError();
+        cov(1, 1) = std::pow(muon.trk_lambdaError(),2);
         cov(1, 2) = muon.trk_lambda_phi_cov();
         cov(1, 3) = muon.trk_lambda_dxy_cov();
         cov(1, 4) = muon.trk_lambda_dsz_cov();
-        cov(2, 2) = muon.trk_phiError();
+        cov(2, 2) = std::pow(muon.trk_phiError(),2);
         cov(2, 3) = muon.trk_phi_dxy_cov();
         cov(2, 4) = muon.trk_phi_dsz_cov();
-        cov(3, 3) = muon.trk_dxyError();
+        cov(3, 3) = std::pow(muon.trk_dxyError(),2);
         cov(3, 4) = muon.trk_dxy_dsz_cov();
-        cov(4, 4) = muon.trk_dszError();
+        cov(4, 4) = std::pow(muon.trk_dszError(),2);
         reco::Track trk(muon.trk_chi2(), muon.trk_ndof(), v, p, muon.charge(), cov);
 
         for (auto &hit : muon.trk_hitPattern().hitPattern) {
