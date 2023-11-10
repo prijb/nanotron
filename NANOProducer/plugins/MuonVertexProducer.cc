@@ -258,24 +258,24 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //
     // For SV we fill from here only stuff that cannot be created with the SimpleFlatTableProducer 
     auto svsTable = std::make_unique<nanoaod::FlatTable>(nGoodSV,svName_,false);
-    svsTable->addColumn<float>("dlen",dlen,"decay length in cm",nanoaod::FlatTable::FloatColumn,20);
+    svsTable->addColumn<float>("dlen",dlen,"decay length in cm",nanoaod::FlatTable::FloatColumn,23);
     svsTable->addColumn<float>("dlenSig",dlenSig,"decay length significance",nanoaod::FlatTable::FloatColumn, 20);
     svsTable->addColumn<float>("dxy", dxy, "2D decay length in cm", nanoaod::FlatTable::FloatColumn, 20);
     svsTable->addColumn<float>("dxySig", dxySig, "2D decay length significance", nanoaod::FlatTable::FloatColumn, 20);
-    svsTable->addColumn<float>("x",x,  "secondary vertex X position, in cm",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("y",y,  "secondary vertex Y position, in cm",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("z",z,  "secondary vertex Z position, in cm",nanoaod::FlatTable::FloatColumn,20);
+    svsTable->addColumn<float>("x",x,  "secondary vertex X position, in cm",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("y",y,  "secondary vertex Y position, in cm",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("z",z,  "secondary vertex Z position, in cm",nanoaod::FlatTable::FloatColumn,23);
     svsTable->addColumn<float>("ndof",ndof,"number of degrees of freedom",nanoaod::FlatTable::FloatColumn,10);
     svsTable->addColumn<float>("chi2",chi2, "reduced chi2, i.e. chi/ndof",nanoaod::FlatTable::FloatColumn,10);
-    svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mass",propMass,"mass propoagated to the vertex position",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",nanoaod::FlatTable::FloatColumn,20);
-    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",nanoaod::FlatTable::FloatColumn,20);
+    svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mass",propMass,"mass propoagated to the vertex position",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",nanoaod::FlatTable::FloatColumn,23);
+    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",nanoaod::FlatTable::FloatColumn,23);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex",nanoaod::FlatTable::IntColumn);
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex",nanoaod::FlatTable::IntColumn);
 

@@ -211,7 +211,7 @@ if options.isData:
     if options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
     if options.year == '2018':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v37', '')
     if options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
@@ -771,13 +771,21 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
 #process.endpath= cms.EndPath(process.OUT)
 
 # ------------------------------------------------------------------------
+process.load("PhysicsTools.NanoAOD.vertices_cff")
+process.svCandidateTable.variables.mass.precision=23
+process.svCandidateTable.variables.pt.precision=23
+process.svCandidateTable.variables.phi.precision=12
+process.muonTable.variables.dxy.precision=23
+process.muonTable.variables.dz.precision=23
+process.muonTable.variables.pt.precision=23
+process.muonTable.variables.phi.precision=23
 # Golden lumisection JSON
 
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 from os import getenv
 if options.isData:
     import FWCore.PythonUtilities.LumiList as LumiList
-    goldenjson = "nanotron/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
+    goldenjson = "/home/users/mcitron/bparkGeneration/CMSSW_10_6_31/src/nanotron/json/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
     lumilist = LumiList.LumiList(filename=goldenjson).getCMSSWString().split(',')
     print("Found json list of lumis to process with {} lumi sections from {}".format(len(lumilist),goldenjson))
     process.source.lumisToProcess = cms.untracked(cms.VLuminosityBlockRange()+lumilist)
