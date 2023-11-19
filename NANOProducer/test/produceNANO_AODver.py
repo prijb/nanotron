@@ -106,6 +106,7 @@ else:
 # More options
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.maxEvents = cms.untracked.PSet(
+    #input = cms.untracked.int32(100)
     input = cms.untracked.int32(-1)
 )
 
@@ -277,11 +278,10 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 )
 
 #Load conversion of RECO to PAT candidates
-#process.load("PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff")
-#process.load("PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff")
-#process.load("PhysicsTools.PatAlgos.cleaningLayer1.cleanPatCandidates_cff")
+process.load("Configuration.StandardSequences.PAT_cff")
 
-#Load conversion of RECO to PAT candidates
+#Load conversion of RECO to PAT candidates (old version)
+"""
 process.load("PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff")
 process.load("PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff")
 process.load("PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi")
@@ -292,16 +292,21 @@ process.load("PhysicsTools.PatAlgos.slimming.packedPFCandidates_cfi")
 process.load("PhysicsTools.PatAlgos.slimming.lostTracks_cfi")
 process.load("PhysicsTools.PatAlgos.slimming.slimmedTrackExtras_cff")
 process.load("PhysicsTools.PatAlgos.slimming.slimmedMuons_cfi")
+"""
+process.load("nanotron.AODConversion.aodmuontable_cff")
 
 #Produce finalMuons for the PAT muonSVs
-process.finalMuons = cms.EDFilter("PATMuonRefSelector",
+process.finalMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("slimmedMuons"),
     cut = cms.string("pt > 15 || (pt > 3 && (passed('CutBasedIdLoose') || passed('SoftCutBasedId') || passed('SoftMvaId') || passed('CutBasedIdGlobalHighPt') || passed('CutBasedIdTrkHighPt')))")
 )
 
+process.finalMuonsTask = cms.Task(process.finalMuons)
+
+#Make muonSVs out of final muons
 process.muonVerticesPatTable = cms.EDProducer("MuonVertexProducer",
-    #srcMuon = cms.InputTag("finalMuons"),
-    srcMuon = cms.InputTag("slimmedMuons"),
+    srcMuon = cms.InputTag("finalMuons"),
+    #srcMuon = cms.InputTag("slimmedMuons"),
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
@@ -311,36 +316,8 @@ process.muonVerticesPatTable = cms.EDProducer("MuonVertexProducer",
 )
 
 #process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatCandidates)
-process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatMuons*process.primaryVertexAssociation*process.offlineSlimmedPrimaryVertices*process.packedPFCandidates*process.lostTracks*process.slimmedMuonTrackExtras*process.slimmedMuons)#*process.finalMuons)
-#Gen particle chain
-process.prunedGenParticles = cms.EDProducer(
-    "GenParticlePruner",
-    src = cms.InputTag("genParticles"),
-    select = cms.vstring(
-    "drop  *  ", # this is the default
-    "keep++ pdgId = {Z0}",
-    "drop pdgId = {Z0} & status = 2"
-    )
-)
-
-process.finalGenParticles = cms.EDProducer("GenParticlePruner",
-    select = cms.vstring(
-        'drop *',
-        'keep++ abs(pdgId) == 15 & (pt > 15 ||  isPromptDecayed() )',
-        'keep+ abs(pdgId) == 15 ',
-        '+keep pdgId == 22 && status == 1 && (pt > 10 || isPromptFinalState())',
-        '+keep abs(pdgId) == 11 || abs(pdgId) == 13 || abs(pdgId) == 15',
-        'drop abs(pdgId)= 2212 && abs(pz) > 1000',
-        'keep (400 < abs(pdgId) < 600) || (4000 < abs(pdgId) < 6000)',
-        'keep abs(pdgId) == 12 || abs(pdgId) == 14 || abs(pdgId) == 16',
-        'keep status == 3 || (status > 20 && status < 30)',
-        'keep isHardProcess() ||  fromHardProcessDecayed()  || fromHardProcessFinalState() || (statusFlags().fromHardProcess() && statusFlags().isLastCopy())',
-        'keep  (status > 70 && status < 80 && pt > 15) ',
-        'keep abs(pdgId) == 23 || abs(pdgId) == 24 || abs(pdgId) == 25 || abs(pdgId) == 37 ',
-        'keep (1000001 <= abs(pdgId) <= 1000039 ) || ( 2000001 <= abs(pdgId) <= 2000015)'
-    ),
-    src = cms.InputTag("prunedGenParticles")
-)
+#process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatMuons*process.primaryVertexAssociation*process.offlineSlimmedPrimaryVertices*process.packedPFCandidates*process.lostTracks*process.slimmedMuonTrackExtras*process.slimmedMuons*process.finalMuons)
+process.patSequence = cms.Sequence(process.patTask, process.finalMuonsTask)
 
 # ------------------------------------------------------------------------
 
@@ -363,7 +340,8 @@ if options.isData:
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable 
         # This step runs vertexing on RECO to PAT candidates
-        + process.patSequence + process.muonVerticesPatTable
+        #+ process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
+        + process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
         #+ process.patSequence + process.finalMuons + process.muonVerticesPatTable
         #+ process.patCandidates + process.muonVerticesPatTable
         #+ process.vertexSequence + process.muonVerticesTable + process.particleSequence
@@ -406,7 +384,8 @@ else:
         process.electronSequence + process.muonSequence + process.jetSequence
         + process.vertexSequence + process.muonVerticesTable
         # This step runs vertexing on RECO to PAT candidates
-        + process.patSequence + process.muonVerticesPatTable
+        #+ process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
+        + process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
         #+ process.patSequence + process.finalMuons + process.muonVerticesPatTable
         #+ process.patCandidates + process.selectedPatMuons + process.cleanPatMuons + process.slimmedMuons + process.finalMuons + process.muonVerticesPatTable
         #+ process.patCandidates + process.muonVerticesPatTable
@@ -433,9 +412,6 @@ else:
     # # # if options.addSignalLHE:
         # # # process.llpnanoAOD_step += process.lheWeightsTable
 
-    process.finalGenParticlesTask = cms.Task(process.prunedGenParticles, process.finalGenParticles)
-    process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask)
-
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
 
@@ -447,6 +423,8 @@ if options.isData:
 #    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.llpnanoAOD_step_ele, process.endjob_step, process.NANOAODSIMoutput_step)
     process.schedule = cms.Schedule(process.llpnanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step)
 else:
+    process.finalGenParticlesTask = cms.Task(process.prunedGenParticles, process.finalGenParticles)
+    process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask)
     process.schedule = cms.Schedule(process.llpnanoAOD_step, process.mc_path, process.endjob_step, process.NANOAODSIMoutput_step)
 
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
@@ -454,6 +432,7 @@ associatePatAlgosToolsTask(process)
 
 # ------------------------------------------------------------------------
 # Remove unneeded modules
+
 
 modulesToRemove = [
     'jetCorrFactorsAK8',
@@ -487,6 +466,7 @@ modulesToRemove = [
     
     # "l1bits",
 ]
+
 
 #override final jets
 
