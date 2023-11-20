@@ -277,9 +277,12 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSV"),
 )
 
-#Load conversion of RECO to PAT candidates
-#process.load("Configuration.StandardSequences.PAT_cff")
-process.load("PhysicsTools.PatAlgos.patSequences_cff")
+#Load conversion of RECO to PAT candidates (NanoAOD uses patTask and not patDefaultSequence)
+#This also loads the pruned gen particle sequence
+process.load("Configuration.StandardSequences.PAT_cff")
+
+#Attempt at loading the PAT sequences
+#process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 #Load conversion of RECO to PAT candidates (old version)
 """
@@ -295,6 +298,7 @@ process.load("PhysicsTools.PatAlgos.slimming.slimmedTrackExtras_cff")
 process.load("PhysicsTools.PatAlgos.slimming.slimmedMuons_cfi")
 """
 process.load("nanotron.AODConversion.aodmuontable_cff")
+
 
 #Produce finalMuons for the PAT muonSVs
 process.finalMuons = cms.EDFilter("PATMuonSelector",
@@ -316,10 +320,10 @@ process.muonVerticesPatTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSVNano"),
 )
 
-#process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatCandidates)
 #process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatMuons*process.primaryVertexAssociation*process.offlineSlimmedPrimaryVertices*process.packedPFCandidates*process.lostTracks*process.slimmedMuonTrackExtras*process.slimmedMuons*process.finalMuons)
-#process.patSequence = cms.Sequence(process.patTask, process.finalMuonsTask)
-process.patSequence = cms.Sequence(process.patDefaultSequence, process.finalMuonsTask)
+process.patSequence = cms.Sequence(process.patTask, process.finalMuonsTask)
+#process.patSequence = cms.Sequence(process.patTask)
+#process.patSequence = cms.Sequence(process.patDefaultSequence, process.finalMuonsTask)
 
 # ------------------------------------------------------------------------
 
