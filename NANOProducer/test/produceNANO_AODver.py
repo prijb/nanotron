@@ -104,7 +104,7 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents = cms.untracked.PSet(
     #input = cms.untracked.int32(100)
     input = cms.untracked.int32(-1)
@@ -278,7 +278,8 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 )
 
 #Load conversion of RECO to PAT candidates
-process.load("Configuration.StandardSequences.PAT_cff")
+#process.load("Configuration.StandardSequences.PAT_cff")
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 #Load conversion of RECO to PAT candidates (old version)
 """
@@ -317,7 +318,8 @@ process.muonVerticesPatTable = cms.EDProducer("MuonVertexProducer",
 
 #process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatCandidates)
 #process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatMuons*process.primaryVertexAssociation*process.offlineSlimmedPrimaryVertices*process.packedPFCandidates*process.lostTracks*process.slimmedMuonTrackExtras*process.slimmedMuons*process.finalMuons)
-process.patSequence = cms.Sequence(process.patTask, process.finalMuonsTask)
+#process.patSequence = cms.Sequence(process.patTask, process.finalMuonsTask)
+process.patSequence = cms.Sequence(process.patDefaultSequence, process.finalMuonsTask)
 
 # ------------------------------------------------------------------------
 
