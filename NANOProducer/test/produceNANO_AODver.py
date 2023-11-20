@@ -104,7 +104,7 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
     #input = cms.untracked.int32(100)
     input = cms.untracked.int32(-1)
@@ -319,6 +319,9 @@ process.muonVerticesPatTable = cms.EDProducer("MuonVertexProducer",
     ptMin   = cms.double(0.8),
     svName  = cms.string("muonSVNano"),
 )
+
+#Load all the remaining collections as tables
+
 
 #process.patSequence = cms.Sequence(process.patCandidates*process.selectedPatCandidates*process.cleanPatMuons*process.primaryVertexAssociation*process.offlineSlimmedPrimaryVertices*process.packedPFCandidates*process.lostTracks*process.slimmedMuonTrackExtras*process.slimmedMuons*process.finalMuons)
 process.patSequence = cms.Sequence(process.patTask, process.finalMuonsTask)
