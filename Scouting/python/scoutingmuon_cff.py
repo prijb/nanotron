@@ -495,6 +495,12 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             precision = cms.int32(-1),
             type = cms.string('int')
         ),
+        vtxidx = cms.PSet(
+            doc = cms.string('vtxidx'),
+            expr = cms.string("userInt('vtxidx')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        )
     )
 )
 

@@ -72,6 +72,11 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         patmuon.setType(muon.type());
         patmuon.setDB(muon.trk_dxy(), muon.trk_dxyError(), pat::Muon::PV2D);
         patmuon.setDB(muon.trk_dz(), muon.trk_dzError(), pat::Muon::PVDZ);
+        //Introduce SV cross reference
+        std::vector<int> vtx_indx = muon.vtxIndx();
+        int sv_idx = -1;
+        if (vtx_indx.size()>0) 
+            sv_idx = vtx_indx.at(0);
         //Do matching with PF candidates
         for (auto &pf: *pfcands){
             float dR;
@@ -143,6 +148,8 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         patmuon.addUserInt("nValidStripHits", muon.nValidStripHits());
         patmuon.addUserInt("nPixelLayersWithMeasurement", muon.nPixelLayersWithMeasurement());
         patmuon.addUserInt("nTrackerLayersWithMeasurement", muon.nTrackerLayersWithMeasurement());
+        //Add vertex index
+        patmuon.addUserInt("vtxidx", sv_idx);
         patMuons->push_back(patmuon);
     }
     auto coll = iEvent.put(std::move(patMuons));
