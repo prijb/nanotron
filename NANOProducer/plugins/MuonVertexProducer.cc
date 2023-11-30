@@ -144,7 +144,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(pvs_, pvsIn);
 
     std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu1phi,mu2phi,mu1eta,mu2eta;
-    std::vector<int> mu1index,mu2index;
+    std::vector<int> mu1index,mu2index,charge;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
@@ -247,6 +247,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             mu2eta.push_back(muObjs[j]->eta());
                             mu1index.push_back(origIndex[i]);
                             mu2index.push_back(origIndex[j]);
+                            charge.push_back(muObjs[i].charge() + muObjs[j].charge());
                             // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
                             nGoodSV++;
                         }
@@ -278,6 +279,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",nanoaod::FlatTable::FloatColumn,23);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex",nanoaod::FlatTable::IntColumn);
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex",nanoaod::FlatTable::IntColumn);
+    svsTable->addColumn<int>("charge",charge,  "vertex charge",nanoaod::FlatTable::IntColumn);
 
 
     iEvent.put(std::move(vertices));
