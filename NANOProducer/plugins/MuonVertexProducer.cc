@@ -188,7 +188,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 muon_j = muTracks[j];
 
             TransientVertex tv;
-            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j && muObjs[i]->charge() != muObjs[j]->charge()) {
+            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j) {
                 std::vector<reco::TransientTrack> transient_tracks{};
                 transient_tracks.push_back(theB->build(muon_i));
                 transient_tracks.push_back(theB->build(muon_j));
