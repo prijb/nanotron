@@ -171,6 +171,7 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 	        const auto & seed = l1obj.first;
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l1cut(seed)) {
+                    best = dr2;
                     l1pt[i] = seed.pt();
                     l1iso[i] = l1obj.second;
                     l1charge[i] = seed.charge();
@@ -183,6 +184,7 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 	        const auto & seed = l1obj.first;
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l1cut_2(seed)) {
+                    best = dr2;
                     l1pt_2[i] = seed.pt();
                 }
             }
@@ -192,6 +194,7 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
             for (const auto & seed : *src) {
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l2cut(seed)) {
+                    best = dr2;
                     l2pt[i] = seed.pt();
                 }
             }
