@@ -61,10 +61,14 @@ elif options.year == '2017':
     process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
 elif options.year == '2018' or options.year == '2018D':
     process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
+elif options.year == '2022':
+    process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
+elif options.year == '2023':
+    process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
 else:
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
-print "Selected year: ", options.year
+print("Selected year: ", options.year)
 
 # ------------------------------------------------------------------------
 # Import of standard configurations
@@ -92,9 +96,9 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(100)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -130,14 +134,17 @@ files = {
     }
 }
 
+
 if len(options.inputFiles) > 0:
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(options.inputFiles)
     )
 else:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        #fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        fileNames = cms.untracked.vstring()
     )
+
 
 # ------------------------------------------------------------------------
 # Production Info
@@ -171,7 +178,7 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         'keep edmTriggerResults_*_*_*',
         'keep nanoaodMergeableCounterTable_*Table_*_*',
         'keep nanoaodUniqueString_nanoMetadata_*_*',
-        
+
         'drop *_caloMetTable_*_*',
         'drop *_saJetTable_*_*',
         'drop *_saTable_*_*',
@@ -186,10 +193,10 @@ process.NANOAODSIMoutput = cms.OutputModule("NanoAODOutputModule",
         'drop *_tkMetTable_*_*',
         'drop *_puppiMetTable_*_*',
         'drop *_ttbarCategoryTable_*_*',
-        
+
         'drop *_rivetMetTable_*_*',
         'drop *_rivetProducerHTXS_*_*',
-        
+
         #'drop *_rivetMetTable_*_*',
     )
 )
@@ -209,12 +216,16 @@ if options.year == "test":
 if options.isData:
     if options.year == '2016':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
-    if options.year == '2017':
+    elif options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
-    if options.year == '2018':
+    elif options.year == '2018':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
-    if options.year == '2018D':
+    elif options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16', '')
+    elif options.year == '2022':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
+    elif options.year == '2023':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_v1', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
 else:
     if options.year == '2016':
@@ -231,6 +242,7 @@ else:
 from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 
+
 updateJetCollection(
     process,
     labelName      = "OnionTag",
@@ -243,11 +255,12 @@ updateJetCollection(
     muSource       = cms.InputTag('slimmedMuons'),
     elSource       = cms.InputTag('slimmedElectrons'),
     btagInfos = [
-        'pfImpactParameterTagInfos',
-        'pfInclusiveSecondaryVertexFinderTagInfos',
-        'pfDeepCSVTagInfos',
+        # 'pfImpactParameterTagInfos',
+        # 'pfInclusiveSecondaryVertexFinderTagInfos',
+        # 'pfDeepCSVTagInfos',
+        'pfDeepFlavourTagInfos'
     ],
-    btagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags'],
+    btagDiscriminators = ['pfDeepFlavourJetTags:probb', 'pfDeepFlavourJetTags:probbb'],
     explicitJTA = False,
 )
 
@@ -257,6 +270,7 @@ process.pfOnionTagInfos = cms.EDProducer("OnionInfoProducer",
     muonSrc                    = cms.InputTag("slimmedMuons"),
     electronSrc                = cms.InputTag("slimmedElectrons"),
     shallow_tag_infos          = cms.InputTag('pfDeepCSVTagInfosOnionTag'),
+    # shallow_tag_infos          = cms.InputTag('pfDeepFlavourTagInfosOnionTag'), # not usable, dows not produce a shallow_tag_infos
     vertices                   = cms.InputTag('offlineSlimmedPrimaryVertices'),
     secondary_vertices_adapted = cms.InputTag("adaptedSlimmedSecondaryVertices"),
     secondary_vertices         = cms.InputTag("slimmedSecondaryVertices")
@@ -264,13 +278,13 @@ process.pfOnionTagInfos = cms.EDProducer("OnionInfoProducer",
 
 
 process.nanoTable = cms.EDProducer("NANOProducer",
-    srcJets   = cms.InputTag("finalJets"),
+    srcJets   = cms.InputTag("updatedJets"),
     srcTags   = cms.InputTag("pfOnionTagInfos")
 )
 
 
 process.nanoGenTable = cms.EDProducer("NANOGenProducer",
-    srcJets   = cms.InputTag("finalJets"),
+    srcJets   = cms.InputTag("updatedJets"),
     srcLabels = cms.InputTag("MCLabels"),
     srcTags   = cms.InputTag("pfOnionTagInfos")
 )
@@ -326,7 +340,7 @@ process.MCGenDecayInfo = cms.EDProducer(
 process.MCLabels = cms.EDProducer(
     "MCLabelProducer",
     srcVertices  = cms.InputTag("displacedGenVertices"),
-    srcJets      = cms.InputTag("updatedJets"),
+    srcJets      = cms.InputTag("finalJets"),
     srcDecayInfo = cms.InputTag("MCGenDecayInfo"),
 )
 
@@ -424,18 +438,84 @@ process.electronFilterSequence = cms.Sequence(
 # ------------------------------------------------------------------------
 # Customisation function from PhysicsTools.NanoAOD.nano_cff
 
-from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData, nanoAOD_customizeMC
+# from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData, nanoAOD_customizeMC
+from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeCommon
 
 if options.isData:
-    process = nanoAOD_customizeData(process)
+    # process = nanoAOD_customizeData(process)
+    process = nanoAOD_customizeCommon(process)
 else:
-    process = nanoAOD_customizeMC(process)
+    # process = nanoAOD_customizeMC(process)
+    process = nanoAOD_customizeCommon(process)
 
 # ------------------------------------------------------------------------
 # B-parking muon selection from:
 # https://github.com/DiElectronX/BParkingNANO/blob/main/BParkingNano/python/muonsBPark_cff.py
 
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
+
+if options.year in ['2022', '2023']:
+    Path = [
+        'HLT_Dimuon0_Jpsi3p5_Muon2',
+        'HLT_Dimuon0_Jpsi_L1_4R_0er1p5R',
+        'HLT_Dimuon0_Jpsi_L1_NoOS',
+        'HLT_Dimuon0_Jpsi_NoVertexing_L1_4R_0er1p5R',
+        'HLT_Dimuon0_Jpsi_NoVertexing_NoOS',
+        'HLT_Dimuon0_Jpsi_NoVertexing',
+        'HLT_Dimuon0_Jpsi',
+        'HLT_Dimuon0_LowMass_L1_0er1p5R',
+        'HLT_Dimuon0_LowMass_L1_0er1p5',
+        'HLT_Dimuon0_LowMass_L1_4R',
+        'HLT_Dimuon0_LowMass_L1_4',
+        'HLT_Dimuon0_LowMass_L1_TM530',
+        'HLT_Dimuon0_LowMass',
+        'HLT_Dimuon0_Upsilon_L1_4p5',
+        'HLT_Dimuon0_Upsilon_L1_4p5er2p0M',
+        'HLT_Dimuon0_Upsilon_L1_4p5er2p0',
+        'HLT_Dimuon0_Upsilon_Muon_NoL1Mass',
+        'HLT_Dimuon0_Upsilon_NoVertexing',
+        'HLT_Dimuon10_Upsilon_y1p4',
+        'HLT_Dimuon12_Upsilon_y1p4',
+        'HLT_Dimuon14_Phi_Barrel_Seagulls',
+        'HLT_Dimuon14_PsiPrime_noCorrL1',
+        'HLT_Dimuon14_PsiPrime',
+        'HLT_Dimuon18_PsiPrime_noCorrL1',
+        'HLT_Dimuon18_PsiPrime',
+        'HLT_Dimuon24_Phi_noCorrL1',
+        'HLT_Dimuon24_Upsilon_noCorrL1',
+        'HLT_Dimuon25_Jpsi_noCorrL1',
+        'HLT_Dimuon25_Jpsi',
+        'HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05',
+        'HLT_DoubleMu3_DoubleEle7p5_CaloIdL_TrackIdL_Upsilon',
+        'HLT_DoubleMu3_TkMu_DsTau3Mu',
+        'HLT_DoubleMu3_Trk_Tau3mu_NoL1Mass',
+        'HLT_DoubleMu3_Trk_Tau3mu',
+        'HLT_DoubleMu4_3_Bs',
+        'HLT_DoubleMu4_3_Displaced_Photon4_BsToMMG',
+        'HLT_DoubleMu4_3_Jpsi',
+        'HLT_DoubleMu4_3_LowMass',
+        'HLT_DoubleMu4_3_Photon4_BsToMMG',
+        'HLT_DoubleMu4_JpsiTrkTrk_Displaced',
+        'HLT_DoubleMu4_JpsiTrk_Bc',
+        'HLT_DoubleMu4_Jpsi_Displaced',
+        'HLT_DoubleMu4_Jpsi_NoVertexing',
+        'HLT_DoubleMu4_LowMass_Displaced',
+        'HLT_DoubleMu4_MuMuTrk_Displaced',
+        'HLT_DoubleMu5_Upsilon_DoubleEle3_CaloIdL_TrackIdL',
+        'HLT_Mu25_TkMu0_Phi',
+        'HLT_Mu30_TkMu0_Psi',
+        'HLT_Mu30_TkMu0_Upsilon',
+        'HLT_Mu4_L1DoubleMu',
+        'HLT_Mu7p5_L2Mu2_Jpsi',
+        'HLT_Mu7p5_L2Mu2_Upsilon',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_Tau15_Charge1',
+        'HLT_Tau3Mu_Mu7_Mu1_TkMu1_Tau15',
+        'HLT_Trimuon5_3p5_2_Upsilon_Muon',
+        'HLT_TrimuonOpen_5_3p5_2_Upsilon_Muon'
+    ]
+
 #Path=["HLT_Mu9_IP6"]
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
@@ -468,13 +548,24 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
 #)
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
-    srcMuon = cms.InputTag("slimmedMuons"),
+    srcMuon = cms.InputTag("linkedObjects", "muons"),
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
     dlenSigMin = cms.double(0),
     ptMin   = cms.double(0.8),
     svName  = cms.string("muonSV"),
+)
+
+process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
+    srcMuon = cms.InputTag("linkedObjects", "muons"),
+    #srcMuon = cms.InputTag("finalMuons"),
+    pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    ptMin   = cms.double(0.8),
+    svName  = cms.string("fourmuonSV"),
 )
 
 # process.muonVerticesCandidateTable =  cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -541,18 +632,22 @@ process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         matched_dpt = Var("userFloat('DPT')",float,doc="dpt/pt with the matched triggering muon" ),        #comma
         skipMuon = Var("userInt('skipMuon')",bool,doc="Is muon skipped (due to large dZ w.r.t. trigger)?"),
         looseId = Var("userInt('looseId')",int,doc="reco muon is Loose"),
-        fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8_IP3 = Var("userInt('HLT_Mu8_IP3')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu8p5_IP3p5 = Var("userInt('HLT_Mu8p5_IP3p5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu9_IP6 = Var("userInt('HLT_Mu9_IP6')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu9_IP5 = Var("userInt('HLT_Mu9_IP5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6')",int,doc="reco muon fired this trigger")#,
+        # fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8_IP3 = Var("userInt('HLT_Mu8_IP3')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu8p5_IP3p5 = Var("userInt('HLT_Mu8p5_IP3p5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu9_IP6 = Var("userInt('HLT_Mu9_IP6')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu9_IP5 = Var("userInt('HLT_Mu9_IP5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5')",int,doc="reco muon fired this trigger"),
+        # fired_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6')",int,doc="reco muon fired this trigger")#,
     ),
 )
+
+for p in Path:
+    setattr(process.muonBParkTable.variables, "fired_%s" % p, Var("userInt('%s')" % p, int, doc="reco muon fired this trigger"))
+
 
 """
 process.muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher", # cut on deltaR, deltaPt/Pt; pick best by deltaR
@@ -601,6 +696,19 @@ process.muonTriggerMatchedTable = process.muonBParkTable.clone(
    )
 )
 
+trigobjpaths = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
+
+#Introduce trigger muons without any L1 selections
+process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
+    bits = cms.InputTag("TriggerResults","","HLT"),
+    objects = cms.InputTag("slimmedPatTrigger"),
+    name= cms.string("TriggerObject"),
+    ptMin = cms.double(0.5),
+    objId = cms.int32(83),
+    HLTPaths = cms.vstring(trigobjpaths)
+    
+)
+
 from  PhysicsTools.NanoAOD.triggerObjects_cff import *
 
 process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProducer",
@@ -622,9 +730,9 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
 # B-parking collection sequences
 process.muonBParkSequence  = cms.Sequence(process.muonTrgSelector)# * process.countTrgMuons)
 process.muonBParkTables    = cms.Sequence(process.muonBParkTable)
-process.muonVertexSequence = cms.Sequence(process.muonVerticesTable)
+process.muonVertexSequence = cms.Sequence(process.muonVerticesTable + process.fourmuonVerticesTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
-process.triggerObjectBParkTables = cms.Sequence(unpackedPatTrigger + process.triggerObjectBParkTable)
+process.triggerObjectBParkTables = cms.Sequence(unpackedPatTrigger + process.triggerObjectBParkTable + process.triggerMuonTable)
 #process.muonBParkMC       = cms.Sequence(process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
 
 # ------------------------------------------------------------------------
@@ -642,7 +750,9 @@ if options.isData:
         process.adaptedVertexing+
         
         process.pfOnionTagInfos+
-        process.nanoTable
+        process.nanoTable,
+        process.jetTask,
+        # process.jetForMETTask 
     )
 
     """
@@ -747,13 +857,13 @@ modulesToRemove = [
 
 for moduleName in modulesToRemove:
     if hasattr(process,moduleName):
-        print "removing module: ",moduleName
+        print("removing module:", moduleName)
         if options.isData:
             process.nanoSequence.remove(getattr(process,moduleName))
         else:
             process.nanoSequenceMC.remove(getattr(process,moduleName))
     else:
-        print "module for removal not found: ",moduleName
+        print("module for removal not found:", moduleName)
 
 #override final photons (required by object linker) so that ID evaluation is not needed
 #process.finalPhotons.cut = cms.string("pt > 5")
@@ -777,17 +887,16 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
 
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 from os import getenv
-if options.isData:
-    import FWCore.PythonUtilities.LumiList as LumiList
-    goldenjson = "nanotron/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
-    lumilist = LumiList.LumiList(filename=goldenjson).getCMSSWString().split(',')
-    print("Found json list of lumis to process with {} lumi sections from {}".format(len(lumilist),goldenjson))
-    process.source.lumisToProcess = cms.untracked(cms.VLuminosityBlockRange()+lumilist)
+# if options.isData:
+    # import FWCore.PythonUtilities.LumiList as LumiList
+    # goldenjson = "nanotron/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
+    # lumilist = LumiList.LumiList(filename=goldenjson).getCMSSWString().split(',')
+    # print("Found json list of lumis to process with {} lumi sections from {}".format(len(lumilist), goldenjson))
+    # process.source.lumisToProcess = cms.untracked(cms.VLuminosityBlockRange()+lumilist)
 
 # ------------------------------------------------------------------------
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
-#print process.dumpPython()
+# print(process.dumpPython())
 # End adding early deletion
-

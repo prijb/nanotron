@@ -9,7 +9,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -37,7 +37,7 @@ using namespace std;
 
 constexpr bool debug = false; //false;
 
-class MuonTriggerSelector : public edm::EDProducer {
+class MuonTriggerSelector : public edm::stream::EDProducer<> {
     
 public:
     
@@ -56,6 +56,7 @@ private:
     edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
     edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescales_;
     edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
+    edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magFieldToken_;
     //for trigger match
     const double maxdR_;
 
@@ -67,17 +68,19 @@ private:
     const double absEtaMax_;      //max eta ""
     const bool softMuonsOnly_;    //cuts muons without soft ID
     std::vector<std::string> HLTPaths_;
+    
 //    std::vector<std::string> L1Seeds_;
 };
 
 
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
-  //bFieldHandle_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+  //bFieldHandle_(esConsumes<magField, IdealMagneticFieldRecord>()),
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
   triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
   triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("objects"))),
   triggerPrescales_(consumes<pat::PackedTriggerPrescales>(iConfig.getParameter<edm::InputTag>("prescales"))),
-  vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ), 
+  vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ),
+  magFieldToken_(esConsumes()),
   maxdR_(iConfig.getParameter<double>("maxdR_matching")),
   dzTrg_cleaning_(iConfig.getParameter<double>("dzForCleaning_wrtTrgMuon")),
   filterMuon_(iConfig.getParameter<bool>("filterMuon")),
@@ -90,17 +93,17 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   // produce 2 collections: trgMuons (tags) and SelectedMuons (probes & tags if survive preselection cuts)
     produces<pat::MuonCollection>("trgMuons"); 
     produces<pat::MuonCollection>("SelectedMuons");
-    produces<TransientTrackCollection>("SelectedTransientMuons");  
+    produces<TransientTrackCollection>("SelectedTransientMuons");
+    
 }
 
 
 void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     
-    // iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle_); // Does not work in CMSSW_10_x (Mikael)
-    const MagneticField* magneticField_;
-    edm::ESHandle<MagneticField> magneticField;
-    iSetup.get<IdealMagneticFieldRecord>().get(magneticField);
-    magneticField_ = &*magneticField;
+    const MagneticField *magneticField_ = &iSetup.getData(magFieldToken_);
+    // edm::ESHandle<MagneticField> magneticField;
+    // iSetup.get<IdealMagneticFieldRecord>().get(magneticField);
+    // magneticField_ = &*magneticField;
     edm::Handle<reco::VertexCollection> vertexHandle;
     iEvent.getByToken(vertexSrc_, vertexHandle);
 //    const reco::Vertex & PV = vertexHandle->front();

@@ -25,6 +25,12 @@
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include <Math/Vector4D.h>
 
+#include "DataFormats/PatCandidates/interface/Particle.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+
 #include "FlatTableFiller.h"
 
 //
@@ -215,9 +221,9 @@ NANOGenProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
 
     
-    jetOriginTable->addColumn<int>("jetIdx", truth_jetIdx, "doc", nanoaod::FlatTable::IntColumn);
+    jetOriginTable->addColumn<int>("jetIdx", truth_jetIdx, "doc");
     
-    for (const auto& labelType: labelTypes) jetOriginTable->addColumn<int>(labelType.first, labelList[labelType.first], "doc", nanoaod::FlatTable::IntColumn);
+    for (const auto& labelType: labelTypes) jetOriginTable->addColumn<int>(labelType.first, labelList[labelType.first], "doc");
     
     //for (const auto& tauDecayType: tauDecayTypes) jetOriginTable->addColumn<int>("tauDecay_"+tauDecayType.first, tauDecayList[tauDecayType.first], "doc", nanoaod::FlatTable::IntColumn);
 

@@ -77,6 +77,10 @@
     <flags EDM_PLUGIN="1"/>
 </library>
 
+<library file="TriggerObjectProducer.cc" name="TriggerObjectProducerPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
 <library file="CandMCMatchTableProducerBPark.cc" name="CandMCMatchTableProducerBParkPlugin">
     <flags EDM_PLUGIN="1"/>
 </library>
@@ -92,6 +96,11 @@
 <library file="MuonVertexProducer.cc" name="MuonVertexProducerPlugin">
     <flags EDM_PLUGIN="1"/>
 </library>
+
+<library file="FourMuonVertexProducer.cc" name="FourMuonVertexProducerPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
 
 <!--flags CXXFLAGS="-g"
 <library   file="*.cc" name="PhysicsToolsBParkingNanoPlugins">

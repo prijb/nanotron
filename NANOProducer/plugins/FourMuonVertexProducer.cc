@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    nanotron/MuonVertexProducer
-// Class:      MuonVertexProducer
+// Package:    nanotron/FourMuonVertexProducer
+// Class:      FourMuonVertexProducer
 // 
-/**\class MuonVertexProducer MuonVertexProducer.cc nanotron/MuonVertexProducer/plugins/MuonVertexProducer.cc
+/**\class FourMuonVertexProducer FourMuonVertexProducer.cc nanotron/FourMuonVertexProducer/plugins/FourMuonVertexProducer.cc
 
  Description: [one line class summary]
 
@@ -62,10 +62,10 @@
 // class declaration
 //
 
-class MuonVertexProducer : public edm::stream::EDProducer<> {
+class FourMuonVertexProducer : public edm::stream::EDProducer<> {
    public:
-      explicit MuonVertexProducer(const edm::ParameterSet&);
-      ~MuonVertexProducer();
+      explicit FourMuonVertexProducer(const edm::ParameterSet&);
+      ~FourMuonVertexProducer();
 
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -102,7 +102,7 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
 //
 // constructors and destructor
 //
-MuonVertexProducer::MuonVertexProducer(const edm::ParameterSet& iConfig):
+FourMuonVertexProducer::FourMuonVertexProducer(const edm::ParameterSet& iConfig):
     _muonInputTag(iConfig.getParameter<edm::InputTag>("srcMuon")),
     _muonToken(consumes<std::vector<pat::Muon>>(_muonInputTag)),
     ttbESToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))),
@@ -118,7 +118,7 @@ MuonVertexProducer::MuonVertexProducer(const edm::ParameterSet& iConfig):
 }
 
 
-MuonVertexProducer::~MuonVertexProducer()
+FourMuonVertexProducer::~FourMuonVertexProducer()
 {
 
    // do anything here that needs to be done at destruction time
@@ -133,7 +133,7 @@ MuonVertexProducer::~MuonVertexProducer()
 
 // ------------ method called to produce the data  ------------
 void
-MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+FourMuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
        // Pick pair of muons with smallest vertex chi square fit for all collection combos
@@ -146,7 +146,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(pvs_, pvsIn);
 
     std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu1phi,mu2phi,mu1eta,mu2eta;
-    std::vector<int> mu1index,mu2index;
+    std::vector<int> mu1index,mu2index,mu3index,mu4index;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
@@ -154,6 +154,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     float muonMass=0.1057;
     const auto & PV0 = pvsIn->front();
     std::vector<int> origIndex;
+    //Apply pt cut
     for (size_t i = 0; i < muons->size(); i++) {
         reco::TrackRef track_i = muons->at(i).muonBestTrack();
         if (track_i.isNonnull() && track_i->pt() > ptMin_) {
@@ -162,7 +163,8 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             origIndex.emplace_back(i);
         }
     }
-
+    
+    //Sorting by momentum 
     std::sort(origIndex.begin(), origIndex.end(),
             [&muTracks](const int& a, const int& b)
             {
@@ -185,74 +187,87 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     for (size_t i = 0; i < muTracks.size(); i++) {
         for (size_t j = i+1; j < muTracks.size(); j++) {
-            reco::TrackRef muon_i, muon_j;
-            if (i < muTracks.size())
-                muon_i = muTracks[i];
-            if (j < muTracks.size())
-                muon_j = muTracks[j];
+            for (size_t k = j+1; k < muTracks.size(); k++){
+                for (size_t l = k+1; l < muTracks.size(); l++){
+                    reco::TrackRef muon_i, muon_j, muon_k, muon_l;
+                    if (i < muTracks.size())
+                        muon_i = muTracks[i];
+                    if (j < muTracks.size())
+                        muon_j = muTracks[j];
+                    if (k < muTracks.size())
+                        muon_k = muTracks[k];
+                    if (l < muTracks.size())
+                        muon_l = muTracks[l];
 
-            TransientVertex tv;
-            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j && muObjs[i].charge() != muObjs[j].charge()) {
-                std::vector<reco::TransientTrack> transient_tracks{};
-                transient_tracks.push_back(theB->build(muon_i));
-                transient_tracks.push_back(theB->build(muon_j));
-                tv = kvf.vertex(transient_tracks);
+                    TransientVertex tv;
+                    if ((muon_i.isNonnull() && muon_j.isNonnull() && muon_k.isNonnull() && muon_l.isNonnull()) && ((muObjs[i].charge() + muObjs[j].charge() + muObjs[k].charge() + muObjs[l].charge())==0)) {
+                        std::vector<reco::TransientTrack> transient_tracks{};
+                        transient_tracks.push_back(theB->build(muon_i));
+                        transient_tracks.push_back(theB->build(muon_j));
+                        transient_tracks.push_back(theB->build(muon_k));
+                        transient_tracks.push_back(theB->build(muon_l));
+                        tv = kvf.vertex(transient_tracks);
 
-                // float vxy = -9999;
-                // float sigma_vxy = -9999;
-                // float vtx_chi2 = 999999;
-                // float vz = -9999;
-                // float dr = -9999;
+                        // float vxy = -9999;
+                        // float sigma_vxy = -9999;
+                        // float vtx_chi2 = 999999;
+                        // float vz = -9999;
+                        // float dr = -9999;
 
-                if (tv.isValid()){
-                    reco::Vertex vertex = reco::Vertex(tv);
-                    if (svCut_(vertex)) {
-                        Measurement1D dl= vdist.distance(PV0,VertexState(RecoVertex::convertPos(vertex.position()),RecoVertex::convertError(vertex.error())));
-                        if(dl.value() > dlenMin_ and dl.significance() > dlenSigMin_){
-                            double dx = (-PV0.x() + vertex.x()), dy = (-PV0.y() + vertex.y()), dz = (-PV0.z() + vertex.z());
-                            double pmag = sqrt(vertex.p4(muonMass).px()*vertex.p4(muonMass).px()+vertex.p4(muonMass).py()*vertex.p4(muonMass).py()+vertex.p4(muonMass).pz()*vertex.p4(muonMass).pz());
-                            double pdotv = (dx * vertex.p4(muonMass).px() + dy*vertex.p4(muonMass).py() + dz*vertex.p4(muonMass).pz())/(pmag*sqrt(dx*dx + dy*dy + dz*dz));
-                            // std::cout << vertex.p4(0.107).mass() << std::endl;
-                            // vxy = sqrt(vertex.x()*vertex.x() + vertex.y()*vertex.y());
-                            // sigma_vxy = (1/vxy)*sqrt(vertex.x()*vertex.x()*vertex.xError()*vertex.xError() +
-                            //         vertex.y()*vertex.y()*vertex.yError()*vertex.yError());
-                            // //sigma_vxy = (1/vxy)*(vertex.x()*vertex.xError() + vertex.y()*vertex.yError());
-                            // vtx_chi2 = vertex.normalizedChi2();
-                            // vz = vertex.z();
-                            // dr = reco::deltaR(*muon_i, *muon_j);
-                            ROOT::Math::PtEtaPhiMVector propagatedP4(0,0,0,0);
-                            for(auto trans : transient_tracks){
-                                GlobalPoint vert(vertex.x(),vertex.y(),vertex.z());
-                                TrajectoryStateClosestToPoint  traj = trans.trajectoryStateClosestToPoint(vert);
-                                GlobalVector momentumPropagated = traj.momentum();
-                                // std::cout << momentumPropagated << std::endl;
-                                ROOT::Math::PtEtaPhiMVector muTrans = ROOT::Math::PtEtaPhiMVector(momentumPropagated.perp(),momentumPropagated.eta(),momentumPropagated.phi(),muonMass);
-                                propagatedP4 += muTrans;
-                            } 
-                            vertices->push_back(vertex);
-                            dlen.push_back(dl.value());
-                            dlenSig.push_back(dl.significance());
-                            origMass.push_back(vertex.p4(muonMass).mass());
-                            propMass.push_back(propagatedP4.mag());
-                            pAngle.push_back(std::acos(pdotv));
-                            Measurement1D d2d = vdistXY.distance(PV0, VertexState(RecoVertex::convertPos(vertex.position()), RecoVertex::convertError(vertex.error())));
-                            dxy.push_back(d2d.value());
-                            dxySig.push_back(d2d.significance());
-                            x.push_back(vertex.x());
-                            y.push_back(vertex.y());
-                            z.push_back(vertex.z());
-                            ndof.push_back(vertex.ndof());
-                            chi2.push_back(vertex.normalizedChi2());
-                            mu1pt.push_back(muObjs[i].pt());
-                            mu2pt.push_back(muObjs[j].pt());
-                            mu1phi.push_back(muObjs[i].phi());
-                            mu2phi.push_back(muObjs[j].phi());
-                            mu1eta.push_back(muObjs[i].eta());
-                            mu2eta.push_back(muObjs[j].eta());
-                            mu1index.push_back(origIndex[i]);
-                            mu2index.push_back(origIndex[j]);
-                            // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
-                            nGoodSV++;
+                        if (tv.isValid()){
+                            reco::Vertex vertex = reco::Vertex(tv);
+                            if (svCut_(vertex)) {
+                                Measurement1D dl= vdist.distance(PV0,VertexState(RecoVertex::convertPos(vertex.position()),RecoVertex::convertError(vertex.error())));
+                                if(dl.value() > dlenMin_ and dl.significance() > dlenSigMin_){
+                                    double dx = (-PV0.x() + vertex.x()), dy = (-PV0.y() + vertex.y()), dz = (-PV0.z() + vertex.z());
+                                    double pmag = sqrt(vertex.p4(muonMass).px()*vertex.p4(muonMass).px()+vertex.p4(muonMass).py()*vertex.p4(muonMass).py()+vertex.p4(muonMass).pz()*vertex.p4(muonMass).pz());
+                                    double pdotv = (dx * vertex.p4(muonMass).px() + dy*vertex.p4(muonMass).py() + dz*vertex.p4(muonMass).pz())/(pmag*sqrt(dx*dx + dy*dy + dz*dz));
+                                    // std::cout << vertex.p4(0.107).mass() << std::endl;
+                                    // vxy = sqrt(vertex.x()*vertex.x() + vertex.y()*vertex.y());
+                                    // sigma_vxy = (1/vxy)*sqrt(vertex.x()*vertex.x()*vertex.xError()*vertex.xError() +
+                                    //         vertex.y()*vertex.y()*vertex.yError()*vertex.yError());
+                                    // //sigma_vxy = (1/vxy)*(vertex.x()*vertex.xError() + vertex.y()*vertex.yError());
+                                    // vtx_chi2 = vertex.normalizedChi2();
+                                    // vz = vertex.z();
+                                    // dr = reco::deltaR(*muon_i, *muon_j);
+                                    ROOT::Math::PtEtaPhiMVector propagatedP4(0,0,0,0);
+                                    for(auto trans : transient_tracks){
+                                        GlobalPoint vert(vertex.x(),vertex.y(),vertex.z());
+                                        TrajectoryStateClosestToPoint  traj = trans.trajectoryStateClosestToPoint(vert);
+                                        GlobalVector momentumPropagated = traj.momentum();
+                                        // std::cout << momentumPropagated << std::endl;
+                                        ROOT::Math::PtEtaPhiMVector muTrans = ROOT::Math::PtEtaPhiMVector(momentumPropagated.perp(),momentumPropagated.eta(),momentumPropagated.phi(),muonMass);
+                                        propagatedP4 += muTrans;
+                                    } 
+                                    vertices->push_back(vertex);
+                                    dlen.push_back(dl.value());
+                                    dlenSig.push_back(dl.significance());
+                                    origMass.push_back(vertex.p4(muonMass).mass());
+                                    propMass.push_back(propagatedP4.mag());
+                                    pAngle.push_back(std::acos(pdotv));
+                                    Measurement1D d2d = vdistXY.distance(PV0, VertexState(RecoVertex::convertPos(vertex.position()), RecoVertex::convertError(vertex.error())));
+                                    dxy.push_back(d2d.value());
+                                    dxySig.push_back(d2d.significance());
+                                    x.push_back(vertex.x());
+                                    y.push_back(vertex.y());
+                                    z.push_back(vertex.z());
+                                    ndof.push_back(vertex.ndof());
+                                    chi2.push_back(vertex.normalizedChi2());
+                                    //Now this returns leading/subleading muon 
+                                    mu1pt.push_back(muObjs[i].pt());
+                                    mu2pt.push_back(muObjs[j].pt());
+                                    mu1phi.push_back(muObjs[i].phi());
+                                    mu2phi.push_back(muObjs[j].phi());
+                                    mu1eta.push_back(muObjs[i].eta());
+                                    mu2eta.push_back(muObjs[j].eta());
+                                    mu1index.push_back(origIndex[i]);
+                                    mu2index.push_back(origIndex[j]);
+                                    mu3index.push_back(origIndex[k]);
+                                    mu4index.push_back(origIndex[l]);
+                                    // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
+                                    nGoodSV++;      
+                                }
+                            }
                         }
                     }
                 }
@@ -282,6 +297,8 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",20);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex");
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex");
+    svsTable->addColumn<int>("mu3index",mu3index,  "third muon index for vertex");
+    svsTable->addColumn<int>("mu4index",mu4index,  "fourth muon index for vertex");
 
 
     iEvent.put(std::move(vertices));
@@ -306,19 +323,19 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
     void
-MuonVertexProducer::beginStream(edm::StreamID)
+FourMuonVertexProducer::beginStream(edm::StreamID)
 {
 }
 
 // ------------ method called once each stream after processing all runs, lumis and events  ------------
 void
-MuonVertexProducer::endStream() {
+FourMuonVertexProducer::endStream() {
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
    void
-   MuonVertexProducer::beginRun(edm::Run const&, edm::EventSetup const&)
+   FourMuonVertexProducer::beginRun(edm::Run const&, edm::EventSetup const&)
    {
    }
    */
@@ -326,7 +343,7 @@ MuonVertexProducer::endStream() {
 // ------------ method called when ending the processing of a run  ------------
 /*
    void
-   MuonVertexProducer::endRun(edm::Run const&, edm::EventSetup const&)
+   FourMuonVertexProducer::endRun(edm::Run const&, edm::EventSetup const&)
    {
    }
    */
@@ -334,7 +351,7 @@ MuonVertexProducer::endStream() {
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
    void
-   MuonVertexProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+   FourMuonVertexProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
    {
    }
    */
@@ -342,14 +359,14 @@ MuonVertexProducer::endStream() {
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
    void
-   MuonVertexProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+   FourMuonVertexProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
    {
    }
    */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-MuonVertexProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+FourMuonVertexProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     //The following says we do not know what parameters are allowed so do no validation
     // Please change this to state exactly what you do use, even if it is no parameters
     edm::ParameterSetDescription desc;
@@ -358,4 +375,4 @@ MuonVertexProducer::fillDescriptions(edm::ConfigurationDescriptions& description
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(MuonVertexProducer);
+DEFINE_FWK_MODULE(FourMuonVertexProducer);

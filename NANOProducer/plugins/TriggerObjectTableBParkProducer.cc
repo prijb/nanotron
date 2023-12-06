@@ -171,6 +171,7 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 	        const auto & seed = l1obj.first;
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l1cut(seed)) {
+                    best = dr2;
                     l1pt[i] = seed.pt();
                     l1iso[i] = l1obj.second;
                     l1charge[i] = seed.charge();
@@ -183,6 +184,7 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 	        const auto & seed = l1obj.first;
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l1cut_2(seed)) {
+                    best = dr2;
                     l1pt_2[i] = seed.pt();
                 }
             }
@@ -192,6 +194,7 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
             for (const auto & seed : *src) {
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l2cut(seed)) {
+                    best = dr2;
                     l2pt[i] = seed.pt();
                 }
             }
@@ -199,16 +202,16 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
     }
 
     auto tab  = std::make_unique<nanoaod::FlatTable>(nobj, name_, false, false);
-    tab->addColumn<int>("id", id, idDoc_, nanoaod::FlatTable::IntColumn);
-    tab->addColumn<float>("pt", pt, "pt", nanoaod::FlatTable::FloatColumn, 12);
-    tab->addColumn<float>("eta", eta, "eta", nanoaod::FlatTable::FloatColumn, 12);
-    tab->addColumn<float>("phi", phi, "phi", nanoaod::FlatTable::FloatColumn, 12);
-    tab->addColumn<float>("l1pt", l1pt, "pt of associated L1 seed", nanoaod::FlatTable::FloatColumn, 8);
-    tab->addColumn<int>("l1iso", l1iso, "iso of associated L1 seed", nanoaod::FlatTable::IntColumn);
-    tab->addColumn<int>("l1charge", l1charge, "charge of associated L1 seed", nanoaod::FlatTable::IntColumn);
-    tab->addColumn<float>("l1pt_2", l1pt_2, "pt of associated secondary L1 seed", nanoaod::FlatTable::FloatColumn, 8);
-    tab->addColumn<float>("l2pt", l2pt, "pt of associated 'L2' seed (i.e. HLT before tracking/PF)", nanoaod::FlatTable::FloatColumn, 10);
-    tab->addColumn<int>("filterBits", bits, "extra bits of associated information: "+bitsDoc_, nanoaod::FlatTable::IntColumn);
+    tab->addColumn<int>("id", id, idDoc_);
+    tab->addColumn<float>("pt", pt, "pt", 12);
+    tab->addColumn<float>("eta", eta, "eta", 12);
+    tab->addColumn<float>("phi", phi, "phi", 12);
+    tab->addColumn<float>("l1pt", l1pt, "pt of associated L1 seed", 8);
+    tab->addColumn<int>("l1iso", l1iso, "iso of associated L1 seed");
+    tab->addColumn<int>("l1charge", l1charge, "charge of associated L1 seed");
+    tab->addColumn<float>("l1pt_2", l1pt_2, "pt of associated secondary L1 seed", 8);
+    tab->addColumn<float>("l2pt", l2pt, "pt of associated 'L2' seed (i.e. HLT before tracking/PF)", 10);
+    tab->addColumn<int>("filterBits", bits, "extra bits of associated information: "+bitsDoc_);
     iEvent.put(std::move(tab));
 }
 

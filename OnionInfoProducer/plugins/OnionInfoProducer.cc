@@ -121,6 +121,7 @@ public:
 
         edm::EDGetTokenT< pat::MuonCollection > muonsMiniAODToken_;
         edm::EDGetTokenT< pat::ElectronCollection > electronsMiniAODToken_;
+        const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbESToken_;
 };
 
 OnionInfoProducer::OnionInfoProducer(const edm::ParameterSet& iConfig) :
@@ -130,7 +131,8 @@ OnionInfoProducer::OnionInfoProducer(const edm::ParameterSet& iConfig) :
     sv_adapted_token_(consumes<reco::VertexCompositePtrCandidateCollection>(iConfig.getParameter<edm::InputTag>("secondary_vertices_adapted"))),
     shallow_tag_info_token_(consumes<edm::View<reco::ShallowTagInfo>>(iConfig.getParameter<edm::InputTag>("shallow_tag_infos"))),
     muonsMiniAODToken_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"))),
-    electronsMiniAODToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"))) { produces<OnionTagInfoCollection>();
+    electronsMiniAODToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"))),
+    ttbESToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>(edm::ESInputTag("", "TransientTrackBuilder"))){ produces<OnionTagInfoCollection>();
 }
 
 
@@ -156,8 +158,9 @@ void OnionInfoProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
     const auto& pv = vtxs->at(0);
-    edm::ESHandle<TransientTrackBuilder> builder;
-    iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
+    const TransientTrackBuilder* builder = &iSetup.getData(ttbESToken_);
+    // edm::ESHandle<TransientTrackBuilder> builder;
+    // iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
 
 
     edm::Handle<reco::VertexCompositePtrCandidateCollection> svs;
@@ -281,11 +284,11 @@ void OnionInfoProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
         // Fill particle content
         // =================================================
-        
+
         push_ChargedContent(features, jet, builder, vtxs, svs, svs_adapted, candidatesMatchedToSV, candidatesMatchedToSVAdapted, electronMap, muonMap);
         push_NeutralContent(features, jet, svs, svs_adapted);
         push_GlobalJetContent(features, jet, vtxs, shallow_tag_infos);
-        
+
         // Fill aux content, must be last
         // =================================================
         push_AuxJetContent(features);
@@ -713,8 +716,8 @@ bool OnionInfoProducer::push_ElectronData(std::size_t k, nanotron::OnionTagFeatu
             elec_features.e2x5MaxOvere5x5 = -1.0;
         }
         elec_features.hcalOverEcal        = electron.hcalOverEcal();
-        elec_features.hcalDepth1OverEcal  = electron.hcalDepth1OverEcal();
-        elec_features.hcalDepth2OverEcal  = electron.hcalDepth2OverEcal();
+        elec_features.hcalDepth1OverEcal  = electron.hcalOverEcal(1);
+        elec_features.hcalDepth2OverEcal  = electron.hcalOverEcal(2);
 
         elec_features.elecSC_eSuperClusterOverP  = electron.eSuperClusterOverP();
         
@@ -724,8 +727,8 @@ bool OnionInfoProducer::push_ElectronData(std::size_t k, nanotron::OnionTagFeatu
         elec_features.puChargedHadronIso = electron.puChargedHadronIso() / electron.pt(); 
 
         elec_features.trackIso           = electron.trackIso() / electron.pt();
-        elec_features.hcalDepth1OverEcal = electron.hcalDepth1OverEcal(); 
-        elec_features.hcalDepth2OverEcal = electron.hcalDepth2OverEcal();  
+        // elec_features.hcalDepth1OverEcal = electron.hcalOverEcal(1); 
+        // elec_features.hcalDepth2OverEcal = electron.hcalOverEcal(2);  
         elec_features.ecalPFClusterIso   = electron.ecalPFClusterIso() / electron.pt(); 
         elec_features.hcalPFClusterIso   = electron.hcalPFClusterIso() / electron.pt();
 
@@ -738,10 +741,10 @@ bool OnionInfoProducer::push_ElectronData(std::size_t k, nanotron::OnionTagFeatu
         // isolation
         elec_features.dr04TkSumPt                = electron.dr04TkSumPt()/electron.pt();
         elec_features.dr04EcalRecHitSumEt        = electron.dr04EcalRecHitSumEt()/electron.pt(); 
-        elec_features.dr04HcalDepth1TowerSumEt   = electron.dr04HcalDepth1TowerSumEt()/electron.pt(); 
-        elec_features.dr04HcalDepth1TowerSumEtBc = electron.dr04HcalDepth1TowerSumEtBc()/electron.pt(); 
-        elec_features.dr04HcalDepth2TowerSumEt   = electron.dr04HcalDepth2TowerSumEt()/electron.pt(); 
-        elec_features.dr04HcalDepth2TowerSumEtBc = electron.dr04HcalDepth2TowerSumEtBc()/electron.pt();
+        elec_features.dr04HcalDepth1TowerSumEt   = electron.dr04HcalTowerSumEt(1)/electron.pt(); 
+        elec_features.dr04HcalDepth1TowerSumEtBc = electron.dr04HcalTowerSumEtBc(1)/electron.pt(); 
+        elec_features.dr04HcalDepth2TowerSumEt   = electron.dr04HcalTowerSumEt(2)/electron.pt(); 
+        elec_features.dr04HcalDepth2TowerSumEtBc = electron.dr04HcalTowerSumEtBc(2)/electron.pt();
         
         elec_features.dr04HcalTowerSumEt = electron.dr04HcalTowerSumEt()/electron.pt();
         elec_features.dr04HcalTowerSumEtBc = electron.dr04HcalTowerSumEtBc()/electron.pt();

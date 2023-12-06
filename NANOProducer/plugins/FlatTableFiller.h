@@ -80,13 +80,13 @@ void fillTable(const std::vector<TYPE>& data, std::unique_ptr<nanoaod::FlatTable
 template<>
 void fillTable<int>(const std::vector<int>& data, std::unique_ptr<nanoaod::FlatTable>& flatTable, const std::string& name, const std::string& doc)
 {
-    flatTable->addColumn<int>(name, data, doc, nanoaod::FlatTable::IntColumn);
+    flatTable->addColumn<int>(name, data, doc);
 }
 
 template<>
 void fillTable<float>(const std::vector<float>& data, std::unique_ptr<nanoaod::FlatTable>& flatTable, const std::string& name, const std::string& doc)
 {
-    flatTable->addColumn<float>(name, data, doc, nanoaod::FlatTable::FloatColumn);
+    flatTable->addColumn<float>(name, data, doc);
 }
 
 template<class CLASS, class TYPE>

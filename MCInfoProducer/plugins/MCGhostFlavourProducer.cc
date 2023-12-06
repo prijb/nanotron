@@ -9,7 +9,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -63,8 +63,7 @@ class GhostInfo:
         size_t decayProductIndex_;
 };
 
-class MCGhostFlavourProducer: 
-    public edm::EDProducer
+class MCGhostFlavourProducer: public edm::stream::EDProducer<>
 {
     public:
         explicit MCGhostFlavourProducer(const edm::ParameterSet&);
