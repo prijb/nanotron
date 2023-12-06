@@ -7,7 +7,7 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO_AODver.py'
+config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO_AOD.py'
 config.JobType.maxMemoryMB = 2500
 config.JobType.pyCfgParams = ['year=2022', 'isData=False']
 
