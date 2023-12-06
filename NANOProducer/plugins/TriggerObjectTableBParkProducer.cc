@@ -155,7 +155,8 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 
 
     unsigned int nobj = selected.size();
-    std::vector<float> pt(nobj,0), eta(nobj,0), phi(nobj,0), l1pt(nobj, 0), l1pt_2(nobj, 0), l2pt(nobj, 0);
+    std::vector<float> pt(nobj,0), eta(nobj,0), phi(nobj,0), l1pt(nobj, 0), l1dR(nobj,0),
+        l1pt_2(nobj, 0), l1dR_2(nobj,0), l2pt(nobj, 0), l2dR(nobj, 0);
     std::vector<int>   id(nobj,0), bits(nobj, 0), l1iso(nobj, 0), l1charge(nobj,0);
     for (unsigned int i = 0; i < nobj; ++i) {
         const auto & obj = *selected[i].first;
@@ -171,10 +172,11 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 	        const auto & seed = l1obj.first;
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l1cut(seed)) {
-		    best = dr2;
+                    best = dr2;
                     l1pt[i] = seed.pt();
                     l1iso[i] = l1obj.second;
                     l1charge[i] = seed.charge();
+                    l1dR[i] = best;
                 }
             }
         }
@@ -184,8 +186,9 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
 	        const auto & seed = l1obj.first;
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l1cut_2(seed)) {
-		    best = dr2;
+                    best = dr2;
                     l1pt_2[i] = seed.pt();
+                    l1dR_2[i] = best;
                 }
             }
         }
@@ -194,8 +197,9 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
             for (const auto & seed : *src) {
                 float dr2 = deltaR2(seed, obj);
                 if (dr2 < best && sel.l2cut(seed)) {
-		    best = dr2;
+                    best = dr2;
                     l2pt[i] = seed.pt();
+                    l2dR[i] = best;
                 }
             }
         }
@@ -209,8 +213,11 @@ TriggerObjectTableBParkProducer::produce(edm::Event& iEvent, const edm::EventSet
     tab->addColumn<float>("l1pt", l1pt, "pt of associated L1 seed", nanoaod::FlatTable::FloatColumn, 8);
     tab->addColumn<int>("l1iso", l1iso, "iso of associated L1 seed", nanoaod::FlatTable::IntColumn);
     tab->addColumn<int>("l1charge", l1charge, "charge of associated L1 seed", nanoaod::FlatTable::IntColumn);
+    tab->addColumn<float>("l1dR", l1dR, "dR w.r.t associated L1 object", nanoaod::FlatTable::FloatColumn, 8);
     tab->addColumn<float>("l1pt_2", l1pt_2, "pt of associated secondary L1 seed", nanoaod::FlatTable::FloatColumn, 8);
+    tab->addColumn<float>("l1dR_2", l1dR_2, "dR w.r.t associated secondary L1 object", nanoaod::FlatTable::FloatColumn, 8);
     tab->addColumn<float>("l2pt", l2pt, "pt of associated 'L2' seed (i.e. HLT before tracking/PF)", nanoaod::FlatTable::FloatColumn, 10);
+    tab->addColumn<float>("l2dR", l2dR, "dR w.r.t associated 'L2' object", nanoaod::FlatTable::FloatColumn, 8);
     tab->addColumn<int>("filterBits", bits, "extra bits of associated information: "+bitsDoc_, nanoaod::FlatTable::IntColumn);
     iEvent.put(std::move(tab));
 }
