@@ -272,6 +272,17 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSV"),
 )
 
+process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
+    srcMuon = cms.InputTag("run3ScoutingMuonToPatMuon"),
+    pvSrc   = cms.InputTag("run3ScoutingVertices", "pvs"),
+    svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    ptMin   = cms.double(0.8),
+    svName  = cms.string("fourmuonSV"),
+)
+
+
 process.prunedGenParticles = cms.EDProducer(
     "GenParticlePruner",
     src = cms.InputTag("genParticles"),
@@ -319,7 +330,7 @@ if options.isData:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable
+        + process.vertexSequence + process.muonVerticesTable + process.fourmuonVerticesTable
     )
 
     """
@@ -347,7 +358,7 @@ else:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable
+        + process.vertexSequence + process.muonVerticesTable + process.fourmuonVerticesTable
         #+ process.vertexSequence + process.muonVerticesTable + process.particleSequence
     )
     # # # process.llpnanoAOD_step = cms.Path(

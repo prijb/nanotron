@@ -557,6 +557,17 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSV"),
 )
 
+process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
+    srcMuon = cms.InputTag("linkedObjects", "muons"),
+    #srcMuon = cms.InputTag("finalMuons"),
+    pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    ptMin   = cms.double(0.8),
+    svName  = cms.string("fourmuonSV"),
+)
+
 # process.muonVerticesCandidateTable =  cms.EDProducer("SimpleCandidateFlatTableProducer",
 #     src = cms.InputTag("muonVerticesTable"),
 #     cut = cms.string(""),  #DO NOT further cut here, use vertexTable.svCut
@@ -685,6 +696,19 @@ process.muonTriggerMatchedTable = process.muonBParkTable.clone(
    )
 )
 
+trigobjpaths = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
+
+#Introduce trigger muons without any L1 selections
+process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
+    bits = cms.InputTag("TriggerResults","","HLT"),
+    objects = cms.InputTag("slimmedPatTrigger"),
+    name= cms.string("TriggerObject"),
+    ptMin = cms.double(0.5),
+    objId = cms.int32(83),
+    HLTPaths = cms.vstring(trigobjpaths)
+    
+)
+
 from  PhysicsTools.NanoAOD.triggerObjects_cff import *
 
 process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProducer",
@@ -706,9 +730,9 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
 # B-parking collection sequences
 process.muonBParkSequence  = cms.Sequence(process.muonTrgSelector)# * process.countTrgMuons)
 process.muonBParkTables    = cms.Sequence(process.muonBParkTable)
-process.muonVertexSequence = cms.Sequence(process.muonVerticesTable)
+process.muonVertexSequence = cms.Sequence(process.muonVerticesTable + process.fourmuonVerticesTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
-process.triggerObjectBParkTables = cms.Sequence(unpackedPatTrigger + process.triggerObjectBParkTable)
+process.triggerObjectBParkTables = cms.Sequence(unpackedPatTrigger + process.triggerObjectBParkTable + process.triggerMuonTable)
 #process.muonBParkMC       = cms.Sequence(process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
 
 # ------------------------------------------------------------------------

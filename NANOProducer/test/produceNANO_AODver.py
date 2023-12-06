@@ -277,6 +277,16 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSV"),
 )
 
+process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
+    srcMuon = cms.InputTag("run3ScoutingMuonToPatMuon"),
+    pvSrc   = cms.InputTag("run3ScoutingVertices", "pvs"),
+    svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    ptMin   = cms.double(0.8),
+    svName  = cms.string("fourmuonSV"),
+)
+
 #Load conversion of RECO to PAT candidates (NanoAOD uses patTask and not patDefaultSequence)
 #This also loads the pruned gen particle sequence
 process.load("Configuration.StandardSequences.PAT_cff")
@@ -347,7 +357,7 @@ if options.isData:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable 
+        + process.vertexSequence + process.muonVerticesTable + process.fourmuonVerticesTable
         # This step runs vertexing on RECO to PAT candidates
         #+ process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
         + process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
@@ -391,7 +401,7 @@ else:
     process.llpnanoAOD_step = cms.Path(
         process.gtStage2Digis + process.l1bits +
         process.electronSequence + process.muonSequence + process.jetSequence
-        + process.vertexSequence + process.muonVerticesTable
+        + process.vertexSequence + process.muonVerticesTable + process.fourmuonVerticesTable
         # This step runs vertexing on RECO to PAT candidates
         #+ process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
         + process.patSequence + process.aodtopatmuonSequence + process.muonVerticesPatTable
