@@ -96,9 +96,9 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(10000)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))

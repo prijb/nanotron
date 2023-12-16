@@ -145,8 +145,8 @@ FourMuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     edm::Handle<std::vector<reco::Vertex>> pvsIn;
     iEvent.getByToken(pvs_, pvsIn);
 
-    std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu1phi,mu2phi,mu1eta,mu2eta;
-    std::vector<int> mu1index,mu2index,mu3index,mu4index;
+    std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu3pt,mu4pt,mu1phi,mu2phi,mu3phi,mu4phi,mu1eta,mu2eta,mu3eta,mu4eta;
+    std::vector<int> mu1index,mu2index,mu3index,mu4index,charge;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
@@ -200,7 +200,9 @@ FourMuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                         muon_l = muTracks[l];
 
                     TransientVertex tv;
-                    if ((muon_i.isNonnull() && muon_j.isNonnull() && muon_k.isNonnull() && muon_l.isNonnull()) && ((muObjs[i].charge() + muObjs[j].charge() + muObjs[k].charge() + muObjs[l].charge())==0)) {
+                    if ((muon_i.isNonnull() && muon_j.isNonnull() && muon_k.isNonnull() && muon_l.isNonnull())){
+                    //Remove OS requirement
+                    //if ((muon_i.isNonnull() && muon_j.isNonnull() && muon_k.isNonnull() && muon_l.isNonnull()) && ((muObjs[i].charge() + muObjs[j].charge() + muObjs[k].charge() + muObjs[l].charge())==0)) {
                         std::vector<reco::TransientTrack> transient_tracks{};
                         transient_tracks.push_back(theB->build(muon_i));
                         transient_tracks.push_back(theB->build(muon_j));
@@ -256,14 +258,21 @@ FourMuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                                     //Now this returns leading/subleading muon 
                                     mu1pt.push_back(muObjs[i].pt());
                                     mu2pt.push_back(muObjs[j].pt());
+                                    mu3pt.push_back(muObjs[k].pt());
+                                    mu4pt.push_back(muObjs[l].pt());
                                     mu1phi.push_back(muObjs[i].phi());
                                     mu2phi.push_back(muObjs[j].phi());
+                                    mu3phi.push_back(muObjs[k].phi());
+                                    mu4phi.push_back(muObjs[l].phi());
                                     mu1eta.push_back(muObjs[i].eta());
                                     mu2eta.push_back(muObjs[j].eta());
+                                    mu3eta.push_back(muObjs[k].eta());
+                                    mu4eta.push_back(muObjs[l].eta());
                                     mu1index.push_back(origIndex[i]);
                                     mu2index.push_back(origIndex[j]);
                                     mu3index.push_back(origIndex[k]);
                                     mu4index.push_back(origIndex[l]);
+                                    charge.push_back(muObjs[i].charge() + muObjs[j].charge() + muObjs[k].charge() + muObjs[l].charge());
                                     // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
                                     nGoodSV++;      
                                 }
@@ -291,14 +300,21 @@ FourMuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     svsTable->addColumn<float>("mass",propMass,"mass propagated to the vertex position",20);
     svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",20);
     svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",20);
+    svsTable->addColumn<float>("mu3pt",mu3pt,  "third muon pt for vertex",20);
+    svsTable->addColumn<float>("mu4pt",mu4pt,  "fourth muon pt for vertex",20);
     svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",20);
     svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",20);
+    svsTable->addColumn<float>("mu3phi",mu3phi,  "third muon phi for vertex",20);
+    svsTable->addColumn<float>("mu4phi",mu4phi,  "fourth muon phi for vertex",20);
     svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",20);
     svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",20);
+    svsTable->addColumn<float>("mu3eta",mu3eta,  "third muon eta for vertex",20);
+    svsTable->addColumn<float>("mu4eta",mu4eta,  "fourth muon eta for vertex",20);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex");
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex");
     svsTable->addColumn<int>("mu3index",mu3index,  "third muon index for vertex");
     svsTable->addColumn<int>("mu4index",mu4index,  "fourth muon index for vertex");
+    svsTable->addColumn<int>("charge",charge,  "vertex charge");
 
 
     iEvent.put(std::move(vertices));

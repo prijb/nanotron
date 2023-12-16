@@ -146,7 +146,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(pvs_, pvsIn);
 
     std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu1phi,mu2phi,mu1eta,mu2eta;
-    std::vector<int> mu1index,mu2index;
+    std::vector<int> mu1index,mu2index,charge;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
@@ -192,7 +192,9 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 muon_j = muTracks[j];
 
             TransientVertex tv;
-            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j && muObjs[i].charge() != muObjs[j].charge()) {
+            if (muon_i.isNonnull() && muon_j.isNonnull() && i != j) {
+            //Removed OS requirement
+            //if (muon_i.isNonnull() && muon_j.isNonnull() && i != j && muObjs[i].charge() != muObjs[j].charge()) {
                 std::vector<reco::TransientTrack> transient_tracks{};
                 transient_tracks.push_back(theB->build(muon_i));
                 transient_tracks.push_back(theB->build(muon_j));
@@ -251,6 +253,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             mu2eta.push_back(muObjs[j].eta());
                             mu1index.push_back(origIndex[i]);
                             mu2index.push_back(origIndex[j]);
+                            charge.push_back(muObjs[i].charge() + muObjs[j].charge());
                             // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
                             nGoodSV++;
                         }
@@ -262,26 +265,27 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //
     // For SV we fill from here only stuff that cannot be created with the SimpleFlatTableProducer 
     auto svsTable = std::make_unique<nanoaod::FlatTable>(nGoodSV,svName_,false);
-    svsTable->addColumn<float>("dlen",dlen,"decay length in cm",20);
+    svsTable->addColumn<float>("dlen",dlen,"decay length in cm",23);
     svsTable->addColumn<float>("dlenSig",dlenSig,"decay length significance", 20);
     svsTable->addColumn<float>("dxy", dxy, "2D decay length in cm", 20);
     svsTable->addColumn<float>("dxySig", dxySig, "2D decay length significance", 20);
-    svsTable->addColumn<float>("x",x,  "secondary vertex X position, in cm",20);
-    svsTable->addColumn<float>("y",y,  "secondary vertex Y position, in cm",20);
-    svsTable->addColumn<float>("z",z,  "secondary vertex Z position, in cm",20);
+    svsTable->addColumn<float>("x",x,  "secondary vertex X position, in cm",23);
+    svsTable->addColumn<float>("y",y,  "secondary vertex Y position, in cm",23);
+    svsTable->addColumn<float>("z",z,  "secondary vertex Z position, in cm",23);
     svsTable->addColumn<float>("ndof",ndof,"number of degrees of freedom",10);
     svsTable->addColumn<float>("chi2",chi2, "reduced chi2, i.e. chi/ndof",10);
-    svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",20);
-    svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",20);
-    svsTable->addColumn<float>("mass",propMass,"mass propagated to the vertex position",20);
-    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",20);
-    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",20);
-    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",20);
-    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",20);
-    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",20);
-    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",20);
+    svsTable->addColumn<float>("pAngle",pAngle,"pointing angle, i.e. acos(p_SV * (SV - PV)) ",23);
+    svsTable->addColumn<float>("origMass",origMass,"original mass from the vertex p4",23);
+    svsTable->addColumn<float>("mass",propMass,"mass propagated to the vertex position",23);
+    svsTable->addColumn<float>("mu1pt",mu1pt,  "lead muon pt for vertex",23);
+    svsTable->addColumn<float>("mu2pt",mu2pt,  "second muon pt for vertex",23);
+    svsTable->addColumn<float>("mu1phi",mu1phi,  "lead muon phi for vertex",23);
+    svsTable->addColumn<float>("mu2phi",mu2phi,  "second muon phi for vertex",23);
+    svsTable->addColumn<float>("mu1eta",mu1eta,  "lead muon eta for vertex",23);
+    svsTable->addColumn<float>("mu2eta",mu2eta,  "second muon eta for vertex",23);
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex");
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex");
+    svsTable->addColumn<int>("charge",charge,  "vertex charge");
 
 
     iEvent.put(std::move(vertices));
