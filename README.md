@@ -35,7 +35,7 @@ cmsenv
 
 Pull the repo (Version which also has configs)
 ```
-git clone git@github.com:prijb/nanotron.git nanotron -b AOD
+git clone git@github.com:prijb/nanotron.git nanotron 
 ```
 
 Update the repo
