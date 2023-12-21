@@ -247,7 +247,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             mu2eta.push_back(muObjs[j]->eta());
                             mu1index.push_back(origIndex[i]);
                             mu2index.push_back(origIndex[j]);
-                            charge.push_back(muObjs[i].charge() + muObjs[j].charge());
+                            charge.push_back(muObjs[i]->charge() + muObjs[j]->charge());
                             // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
                             nGoodSV++;
                         }
