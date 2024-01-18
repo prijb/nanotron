@@ -243,210 +243,14 @@ from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 
 
-updateJetCollection(
-    process,
-    labelName      = "OnionTag",
-    jetSource      = cms.InputTag('updatedJets'),
-    jetCorrections = jetCorrectionsAK4PFchs,
-    pfCandidates   = cms.InputTag('packedPFCandidates'),
-    pvSource       = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    #svSource = cms.InputTag('adaptedSlimmedSecondaryVertices'), 
-    svSource       = cms.InputTag('slimmedSecondaryVertices'),
-    muSource       = cms.InputTag('slimmedMuons'),
-    elSource       = cms.InputTag('slimmedElectrons'),
-    btagInfos = [
-        # 'pfImpactParameterTagInfos',
-        # 'pfInclusiveSecondaryVertexFinderTagInfos',
-        # 'pfDeepCSVTagInfos',
-        'pfDeepFlavourTagInfos'
-    ],
-    btagDiscriminators = ['pfDeepFlavourJetTags:probb', 'pfDeepFlavourJetTags:probbb'],
-    explicitJTA = False,
-)
-
-
-process.pfOnionTagInfos = cms.EDProducer("OnionInfoProducer",
-    jets                       = cms.InputTag("updatedJets"),
-    muonSrc                    = cms.InputTag("slimmedMuons"),
-    electronSrc                = cms.InputTag("slimmedElectrons"),
-    shallow_tag_infos          = cms.InputTag('pfDeepCSVTagInfosOnionTag'),
-    # shallow_tag_infos          = cms.InputTag('pfDeepFlavourTagInfosOnionTag'), # not usable, dows not produce a shallow_tag_infos
-    vertices                   = cms.InputTag('offlineSlimmedPrimaryVertices'),
-    secondary_vertices_adapted = cms.InputTag("adaptedSlimmedSecondaryVertices"),
-    secondary_vertices         = cms.InputTag("slimmedSecondaryVertices")
-)
-
-
-process.nanoTable = cms.EDProducer("NANOProducer",
-    srcJets   = cms.InputTag("updatedJets"),
-    srcTags   = cms.InputTag("pfOnionTagInfos")
-)
-
-
-process.nanoGenTable = cms.EDProducer("NANOGenProducer",
-    srcJets   = cms.InputTag("updatedJets"),
-    srcLabels = cms.InputTag("MCLabels"),
-    srcTags   = cms.InputTag("pfOnionTagInfos")
-)
-
 
 process.load('nanotron.NANOProducer.GenDisplacedVertices_cff')
-
-process.MCGenDecayInfo = cms.EDProducer(
-    "MCGenDecayInfoProducer",
-    src = cms.InputTag("genParticlesMerged"),
-    decays = cms.PSet(
-        #dark QCD
-        dark_vector = cms.PSet(
-            llpId = cms.int32(4900113),
-            daughterIds = cms.vint32([1,2,3,4,5,11,13,15])
-        ),
-        dark_photon = cms.PSet(
-            llpId = cms.int32(999999),
-            daughterIds = cms.vint32([1,2,3,4,5,11,13,15])
-        ),
-        #hnl -> qql
-        hnl_dirac = cms.PSet(
-            llpId = cms.int32(9990012),
-            daughterIds = cms.vint32([1,2,3,4,5,11,13,15])
-        ),
-        hnl_majorana = cms.PSet(
-            llpId = cms.int32(9900012),
-            daughterIds = cms.vint32([1,2,3,4,5,11,13,15])
-        ),
-        #gluino -> qq chi0
-        split = cms.PSet(
-            llpId = cms.int32(1000021),
-            daughterIds = cms.vint32([1,2,3,4,5])
-        ),
-        #gluino -> g gravitino
-        gmsb = cms.PSet(
-            llpId = cms.int32(1000021),
-            daughterIds = cms.vint32([21])
-        ),
-        #stop -> bl
-        rpv = cms.PSet(
-            llpId = cms.int32(1000006),
-            daughterIds = cms.vint32([5,11,13,15])
-        ),
-        #H->SS->bbbb
-        hss = cms.PSet(
-            llpId = cms.int32(9000006),
-            daughterIds = cms.vint32([5])
-        ),
-    )
-)
-
-process.MCLabels = cms.EDProducer(
-    "MCLabelProducer",
-    srcVertices  = cms.InputTag("displacedGenVertices"),
-    srcJets      = cms.InputTag("finalJets"),
-    srcDecayInfo = cms.InputTag("MCGenDecayInfo"),
-)
-
-process.lheWeightsTable = cms.EDProducer(
-    "LHEWeightsProducer",
-    lheInfo      = cms.VInputTag(cms.InputTag("externalLHEProducer"), cms.InputTag("source")),
-    weightGroups = cms.PSet()
-)
-
-# Particle gun parameters
-process.lheWeightsTable.weightGroups.gun_ctau    = cms.vstring(['ctau'])
-process.lheWeightsTable.weightGroups.gun_llpmass = cms.vstring(['llpmass'])
-
-# ------------------------------------------------------------------------
-# Coupling reweighting
-
-process.lheWeightsTable.weightGroups.coupling    = cms.vstring()
-for i in range(1,68):
-    process.lheWeightsTable.weightGroups.coupling.append("rwgt_%i"%(i))
-
 
 # ------------------------------------------------------------------------
 # Parton Density Functions
 
-# PDF NNPDF3.1 NNLO hessian
-process.lheWeightsTable.weightGroups.nnpdfhessian = cms.vstring()
-for i in range(1048,1151):
-    process.lheWeightsTable.weightGroups.nnpdfhessian.append("%i"%(i))
-
-# PDF NNPDF3.1 NNLO replicas
-process.lheWeightsTable.weightGroups.nnpdfreplica = cms.vstring()
-for i in range(1151,1252):
-    process.lheWeightsTable.weightGroups.nnpdfreplica.append("%i"%(i))
-
-# Scale weights
-for scaleSet in [
-    ['murNominal_mufNominal',range(1001,1006)],
-    ['murUp_mufNominal',     range(1006,1011)],
-    ['murDown_mufNominal',   range(1011,1016)],
-    ['murNominal_mufUp',     range(1016,1021)],
-    ['murUp_mufUp',          range(1021,1026)],
-    ['murDown_mufUp',        range(1026,1031)],
-    ['murNominal_mufDown',   range(1031,1036)],
-    ['murUp_mufDown',        range(1036,1041)],
-    ['murDown_mufDown',      range(1041,1046)],
-    ['emission',             range(1046,1048)],
-    ]:
-    setattr(process.lheWeightsTable.weightGroups,scaleSet[0],cms.vstring())
-    for i in scaleSet[1]:
-        getattr(process.lheWeightsTable.weightGroups,scaleSet[0]).append("%i"%(i))
-
-
 process.load('RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff')
 process.load('nanotron.NANOProducer.adaptedSV_cff')
-
-
-# ------------------------------------------------------------------------
-# Muon Filter
-
-"""
-process.selectedMuonsForFilter = cms.EDFilter("CandViewSelector",
-    src = cms.InputTag("slimmedMuons"),
-    cut = cms.string("pt > 0.0 && isGlobalMuon()")
-)
-
-process.selectedMuonsMinFilter = cms.EDFilter("CandViewCountFilter",
-    src       = cms.InputTag("selectedMuonsForFilter"),
-    minNumber = cms.uint32(1)
-)
-
-process.muonFilterSequence = cms.Sequence(
-    process.selectedMuonsForFilter + process.selectedMuonsMinFilter
-)
-"""
-
-# ------------------------------------------------------------------------
-# Electron Filter
-
-"""
-process.selectedElectronsForFilter = cms.EDFilter("CandViewSelector",
-    src = cms.InputTag("slimmedElectrons"),
-    cut = cms.string("pt > 0.0")
-)
-
-process.selectedElectronsMinFilter = cms.EDFilter("CandViewCountFilter",
-    src       = cms.InputTag("selectedElectronsForFilter"),
-    minNumber = cms.uint32(1)
-)
-
-process.electronFilterSequence = cms.Sequence(
-    process.selectedElectronsForFilter + process.selectedElectronsMinFilter
-)
-"""
-
-# ------------------------------------------------------------------------
-# Customisation function from PhysicsTools.NanoAOD.nano_cff
-
-# from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeData, nanoAOD_customizeMC
-from PhysicsTools.NanoAOD.nano_cff import nanoAOD_customizeCommon
-
-if options.isData:
-    # process = nanoAOD_customizeData(process)
-    process = nanoAOD_customizeCommon(process)
-else:
-    # process = nanoAOD_customizeMC(process)
-    process = nanoAOD_customizeCommon(process)
 
 # ------------------------------------------------------------------------
 # B-parking muon selection from:
@@ -568,23 +372,6 @@ process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
     svName  = cms.string("fourmuonSV"),
 )
 
-# process.muonVerticesCandidateTable =  cms.EDProducer("SimpleCandidateFlatTableProducer",
-#     src = cms.InputTag("muonVerticesTable"),
-#     cut = cms.string(""),  #DO NOT further cut here, use vertexTable.svCut
-#     name = cms.string("muonSV"),
-#     singleton = cms.bool(False), # the number of entries is variable
-#     extension = cms.bool(True), 
-#     variables = cms.PSet(P4Vars,
-#         x   = Var("position().x()", float, doc = "secondary vertex X position, in cm",precision=10),
-#         # y   = Var("position().y()", float, doc = "secondary vertex Y position, in cm",precision=10),
-#         # z   = Var("position().z()", float, doc = "secondary vertex Z position, in cm",precision=14),
-#         # ndof   = Var("vertexNdof()", float, doc = "number of degrees of freedom",precision=8),
-#         # chi2   = Var("vertexNormalizedChi2()", float, doc = "reduced chi2, i.e. chi/ndof",precision=8),
-#     ),
-# )
-# process.muonVerticesCandidateTable.variables.pt.precision=10
-# process.muonVerticesCandidateTable.variables.phi.precision=12
-
 process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = cms.InputTag("muonTrgSelector:SelectedMuons"),
     cut = cms.string(""), #we should not filter on cross linked collections
@@ -648,35 +435,6 @@ process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 for p in Path:
     setattr(process.muonBParkTable.variables, "fired_%s" % p, Var("userInt('%s')" % p, int, doc="reco muon fired this trigger"))
 
-
-"""
-process.muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher", # cut on deltaR, deltaPt/Pt; pick best by deltaR
-    src         = process.muonBParkTable.src,                   # final reco collection
-    matched     = cms.InputTag("finalGenParticlesBPark"),       # final mc-truth particle collection
-    mcPdgId     = cms.vint32(13),                               # one or more PDG ID (13 = mu); absolute values (see below)
-    checkCharge = cms.bool(False),                              # True = require RECO and MC objects to have the same charge
-    mcStatus    = cms.vint32(1),                                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.03),                             # Minimum deltaR for the match
-    maxDPtRel   = cms.double(0.5),                              # Minimum deltaPt/Pt for the match
-    resolveAmbiguities    = cms.bool(True),                     # Forbid two RECO objects to match to the same GEN object
-    resolveByMatchQuality = cms.bool(True),                     # False = just match input in order; True = pick lowest deltaR pair first
-)
-
-process.muonBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
-    src     = process.muonBParkTable.src,
-    mcMap   = cms.InputTag("muonsBParkMCMatchForTable"),
-    objName = process.muonBParkTable.name,
-    objType = process.muonBParkTable.name, 
-    branchName = cms.string("genPart"),
-    docString = cms.string("MC matching to status==1 muons"),
-)
-
-process.selectedMuonsMCMatchEmbedded = cms.EDProducer('MuonMatchEmbedder',
-    src = cms.InputTag('muonTrgSelector:SelectedMuons'),
-    matching = cms.InputTag('muonsBParkMCMatchForTable')
-)
-"""
-
 process.muonTriggerMatchedTable = process.muonBParkTable.clone(
     src = cms.InputTag("muonTrgSelector:trgMuons"),
     name = cms.string("TriggerMuon"),
@@ -702,7 +460,7 @@ trigobjpaths = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'H
 process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
     bits = cms.InputTag("TriggerResults","","HLT"),
     objects = cms.InputTag("slimmedPatTrigger"),
-    name= cms.string("TrigObjHLT"),
+    name= cms.string("TrigObj"),
     ptMin = cms.double(0.5),
     objId = cms.int32(83),
     HLTPaths = cms.vstring(trigobjpaths)
@@ -745,26 +503,11 @@ if options.isData:
 
     # Main
     process.llpnanoAOD_step_mu = cms.Path(
-        #process.muonFilterSequence+
         process.nanoSequence+
-        process.adaptedVertexing+
-        
-        process.pfOnionTagInfos+
-        process.nanoTable,
-        process.jetTask,
-        # process.jetForMETTask 
+        process.adaptedVertexing
     )
 
-    """
-    process.llpnanoAOD_step_ele = cms.Path(
-        process.electronFilterSequence+
-        process.nanoSequence+
-        process.adaptedVertexing+
 
-        process.pfOnionTagInfos+
-        process.nanoTable
-    )
-    """
 
     # B-parking additions
     process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
@@ -778,25 +521,11 @@ if options.isData:
 else:
     # Main
     process.llpnanoAOD_step = cms.Path(
-        process.nanoSequenceMC+
-        #process.adaptedVertexing+
-        #process.pfOnionTagInfos+
-        #process.displacedGenVertexSequence+
-
-        #process.MCGenDecayInfo+
-        #process.MCLabels+
-
-        process.nanoTable+
-        process.nanoGenTable
+        process.nanoSequenceMC
     )
 
     # B-parking additions
     process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
-    #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
-
-    # LHE
-    #if options.addSignalLHE:
-    #    process.llpnanoAOD_step += process.lheWeightsTable
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
