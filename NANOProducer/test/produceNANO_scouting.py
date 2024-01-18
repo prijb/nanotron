@@ -104,9 +104,9 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -282,7 +282,7 @@ process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
     svName  = cms.string("fourmuonSV"),
 )
 
-
+"""
 process.prunedGenParticles = cms.EDProducer(
     "GenParticlePruner",
     src = cms.InputTag("genParticles"),
@@ -292,6 +292,7 @@ process.prunedGenParticles = cms.EDProducer(
     "drop pdgId = {Z0} & status = 2"
     )
 )
+"""
 
 process.finalGenParticles = cms.EDProducer("GenParticlePruner",
     select = cms.vstring(
@@ -310,6 +311,28 @@ process.finalGenParticles = cms.EDProducer("GenParticlePruner",
         'keep (1000001 <= abs(pdgId) <= 1000039 ) || ( 2000001 <= abs(pdgId) <= 2000015)'
     ),
     src = cms.InputTag("prunedGenParticles")
+)
+
+#Genmatching sequence 
+process.muonsMCMatchForTable = cms.EDProducer("MCMatcher",       # cut on deltaR, deltaPt/Pt; pick best by deltaR
+    src         = (process.ScoutingMuonTable).src,                         # final reco collection
+    matched     = cms.InputTag("finalGenParticles"),     # final mc-truth particle collection
+    mcPdgId     = cms.vint32(13),               # one or more PDG ID (13 = mu); absolute values (see below)
+    checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge
+    mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
+    maxDeltaR   = cms.double(0.3),              # Minimum deltaR for the match
+    maxDPtRel   = cms.double(0.5),              # Minimum deltaPt/Pt for the match
+    resolveAmbiguities    = cms.bool(True),     # Forbid two RECO objects to match to the same GEN object
+    resolveByMatchQuality = cms.bool(True),    # False = just match input in order; True = pick lowest deltaR pair first
+)
+
+process.muonMCTable = cms.EDProducer("CandMCMatchTableProducer",
+    src     = (process.ScoutingMuonTable).src,
+    mcMap   = cms.InputTag("muonsMCMatchForTable"),
+    objName = (process.ScoutingMuonTable).name,
+    objType = (process.ScoutingMuonTable).name, #cms.string("Muon"),
+    branchName = cms.string("genPart"),
+    docString = cms.string("MC matching to status==1 muons"),
 )
 
 # ------------------------------------------------------------------------
@@ -344,11 +367,6 @@ if options.isData:
     )
     """
 
-    # B-parking additions
-    # # # # # # # # # # # # # # # # # process.llpnanoAOD_step_mu += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
-    #process.llpnanoAOD_step_ele += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
-    #process.llpnanoAOD_step_mu += process.metadata
-
 # ========================================================================
 # ** MC SEQUENCE **
 # ========================================================================
@@ -361,29 +379,7 @@ else:
         + process.vertexSequence + process.muonVerticesTable + process.fourmuonVerticesTable
         #+ process.vertexSequence + process.muonVerticesTable + process.particleSequence
     )
-    # # # process.llpnanoAOD_step = cms.Path(
-        # # # process.nanoSequenceMC+
-        # # # process.adaptedVertexing+
-        # # # process.pfOnionTagInfos+
-        # # # process.displacedGenVertexSequence+
 
-        # # # process.MCGenDecayInfo+
-        # # # process.MCLabels+
-
-        # # # process.nanoTable+
-        # # # process.nanoGenTable
-    # # # )
-
-    # B-parking additions
-    # # # # process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
-    #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
-
-    # LHE
-    # # # if options.addSignalLHE:
-        # # # process.llpnanoAOD_step += process.lheWeightsTable
-
-    process.finalGenParticlesTask = cms.Task(process.prunedGenParticles, process.finalGenParticles)
-    process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask)
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
@@ -396,6 +392,12 @@ if options.isData:
 #    process.schedule = cms.Schedule(process.llpnanoAOD_step_mu, process.llpnanoAOD_step_ele, process.endjob_step, process.NANOAODSIMoutput_step)
     process.schedule = cms.Schedule(process.llpnanoAOD_step, process.endjob_step, process.NANOAODSIMoutput_step)
 else:
+    #MINIAODSIM already prunes the gen particles
+    #process.finalGenParticlesTask = cms.Task(process.prunedGenParticles, process.finalGenParticles)
+    process.finalGenParticlesTask = cms.Task(process.finalGenParticles)
+    process.muonGenmatchTask = cms.Task(process.muonsMCMatchForTable, process.muonMCTable)
+    process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask, process.muonGenmatchTask)
+    #process.mc_path = cms.Path(process.finalGenParticlesTask, process.genParticleTablesTask)
     process.schedule = cms.Schedule(process.llpnanoAOD_step, process.mc_path, process.endjob_step, process.NANOAODSIMoutput_step)
 
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
@@ -437,25 +439,6 @@ modulesToRemove = [
     # "l1bits",
 ]
 
-#override final jets
-
-#process.finalJets.addBTagInfo=cms.bool(True)
-#process.finalJets.addDiscriminators = cms.bool(True)
-#process.finalJets.addTagInfos=cms.bool(True)
-
-# # # # # # # # # # for moduleName in modulesToRemove:
-    # # # # # # # # # # if hasattr(process,moduleName):
-        # # # # # # # # # # print("removing module:", moduleName)
-        # # # # # # # # # # if options.isData:
-            # # # # # # # # # # process.nanoSequence.remove(getattr(process,moduleName))
-        # # # # # # # # # # else:
-            # # # # # # # # # # process.nanoSequenceMC.remove(getattr(process,moduleName))
-    # # # # # # # # # # else:
-        # # # # # # # # # # print("module for removal not found:", moduleName)
-
-#override final photons (required by object linker) so that ID evaluation is not needed
-#process.finalPhotons.cut = cms.string("pt > 5")
-#process.finalPhotons.src = cms.InputTag("slimmedPhotons")
 
 process.genParticleTable.variables.vertex_x = Var("vertex().x()", float, doc="vertex x position")
 process.genParticleTable.variables.vertex_y = Var("vertex().y()", float, doc="vertex y position")

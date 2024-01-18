@@ -96,9 +96,9 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -702,7 +702,7 @@ trigobjpaths = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'H
 process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
     bits = cms.InputTag("TriggerResults","","HLT"),
     objects = cms.InputTag("slimmedPatTrigger"),
-    name= cms.string("TriggerObject"),
+    name= cms.string("TrigObj"),
     ptMin = cms.double(0.5),
     objId = cms.int32(83),
     HLTPaths = cms.vstring(trigobjpaths)
@@ -779,12 +779,12 @@ else:
     # Main
     process.llpnanoAOD_step = cms.Path(
         process.nanoSequenceMC+
-        process.adaptedVertexing+
-        process.pfOnionTagInfos+
-        process.displacedGenVertexSequence+
+        #process.adaptedVertexing+
+        #process.pfOnionTagInfos+
+        #process.displacedGenVertexSequence+
 
-        process.MCGenDecayInfo+
-        process.MCLabels+
+        #process.MCGenDecayInfo+
+        #process.MCLabels+
 
         process.nanoTable+
         process.nanoGenTable
@@ -795,8 +795,8 @@ else:
     #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
-    if options.addSignalLHE:
-        process.llpnanoAOD_step += process.lheWeightsTable
+    #if options.addSignalLHE:
+    #    process.llpnanoAOD_step += process.lheWeightsTable
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
