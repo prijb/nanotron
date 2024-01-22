@@ -230,10 +230,13 @@ if options.isData:
 else:
     if options.year == '2016':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mcRun2_asymptotic_v8', '')
-    if options.year == '2017':
+    elif options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mc2017_realistic_v8', '')
-    if options.year == '2018' or options.year == '2018D':
+    elif options.year == '2018' or options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
+    elif options.year == '2022':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun3_2022_realistic_v3', '')
+    
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None')
 
 # ------------------------------------------------------------------------
@@ -460,7 +463,7 @@ trigobjpaths = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'H
 process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
     bits = cms.InputTag("TriggerResults","","HLT"),
     objects = cms.InputTag("slimmedPatTrigger"),
-    name= cms.string("TrigObj"),
+    name= cms.string("TriggerObject"),
     ptMin = cms.double(0.5),
     objId = cms.int32(83),
     HLTPaths = cms.vstring(trigobjpaths)

@@ -50,7 +50,7 @@ private:
     
     virtual void produce(edm::Event&, const edm::EventSetup&);
 
-    // const edm::ESHandle<MagneticField> bFieldHandle_; // Does not work in CMSSW_10_x (Mikael)
+    //const edm::ESHandle<MagneticField> bFieldHandle_; // Does not work in CMSSW_10_x (Mikael)
     edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
     edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
     edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
