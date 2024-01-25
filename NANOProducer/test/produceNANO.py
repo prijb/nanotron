@@ -98,7 +98,7 @@ else:
 # More options
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -521,7 +521,8 @@ if options.year in ['2022', '2023']:
 #Path=["HLT_Mu9_IP6"]
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
-                                muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
+                                #muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD    
+                                muonCollection = cms.InputTag("linkedObjects", "muons"), #same collection as in muonSV                                                     
                                 bits = cms.InputTag("TriggerResults","","HLT"),
                                 prescales = cms.InputTag("patTrigger"),
                                 objects = cms.InputTag("slimmedPatTrigger"),
@@ -531,13 +532,23 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                 maxdR_matching = cms.double(0.1),
 
                                 ## for the output selected collection (tag + all compatible in dZ)
-                                filterMuon = cms.bool(True),
+                                #Change these to get one-to-one with input collection
+                                filterMuon = cms.bool(True), 
                                 dzForCleaning_wrtTrgMuon = cms.double(1.0),
 
                                 ptMin = cms.double(0.5),
                                 absEtaMax = cms.double(2.4),
                                 # keeps only muons with at soft Quality flag
                                 softMuonsOnly = cms.bool(False),
+                                
+                                #Loosest cuts
+                                #filterMuon = cms.bool(False), 
+                                #dzForCleaning_wrtTrgMuon = cms.double(1.0),
+
+                                #ptMin = cms.double(0.0),
+                                #absEtaMax = cms.double(10.0),
+                                # keeps only muons with at soft Quality flag
+                                #softMuonsOnly = cms.bool(False),
                                 HLTPaths=cms.vstring(Path)#, ### comma to the softMuonsOnly
 #				 L1seeds=cms.vstring(Seed)
                              )
@@ -781,12 +792,12 @@ else:
     # Main
     process.llpnanoAOD_step = cms.Path(
         process.nanoSequenceMC+
-        #process.adaptedVertexing+
-        #process.pfOnionTagInfos+
-        #process.displacedGenVertexSequence+
+        process.adaptedVertexing+
+        process.pfOnionTagInfos+
+        process.displacedGenVertexSequence+
 
-        #process.MCGenDecayInfo+
-        #process.MCLabels+
+        process.MCGenDecayInfo+
+        process.MCLabels+
 
         process.nanoTable+
         process.nanoGenTable
@@ -797,8 +808,8 @@ else:
     #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
-    #if options.addSignalLHE:
-    #    process.llpnanoAOD_step += process.lheWeightsTable
+    if options.addSignalLHE:
+        process.llpnanoAOD_step += process.lheWeightsTable
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)

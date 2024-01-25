@@ -235,8 +235,9 @@ else:
     elif options.year == '2018' or options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
     elif options.year == '2022':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun3_2022_realistic_v3', '')
-    
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2022_realistic_postEE_v1', '')
+    elif options.year == '2023':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2023_realistic_postBPix_v1', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None')
 
 # ------------------------------------------------------------------------
@@ -355,7 +356,7 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
 #)
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
-    srcMuon = cms.InputTag("linkedObjects", "muons"),
+    srcMuon = cms.InputTag("slimmedMuons"),
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),
@@ -365,7 +366,7 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 )
 
 process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
-    srcMuon = cms.InputTag("linkedObjects", "muons"),
+    srcMuon = cms.InputTag("slimmedMuons"),
     #srcMuon = cms.InputTag("finalMuons"),
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
@@ -491,6 +492,7 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
 # B-parking collection sequences
 process.muonBParkSequence  = cms.Sequence(process.muonTrgSelector)# * process.countTrgMuons)
 process.muonBParkTables    = cms.Sequence(process.muonBParkTable)
+#process.muonVertexSequence = cms.Sequence(process.muonVerticesTable)
 process.muonVertexSequence = cms.Sequence(process.muonVerticesTable + process.fourmuonVerticesTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
 process.triggerObjectBParkTables = cms.Sequence(unpackedPatTrigger + process.triggerObjectBParkTable + process.triggerMuonTable)
