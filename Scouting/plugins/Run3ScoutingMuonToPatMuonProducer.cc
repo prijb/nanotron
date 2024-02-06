@@ -83,7 +83,7 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
             if(TMath::Abs(pf.pdgId())!=13) continue;
             else{
                 dR = std::sqrt(std::pow((muon.eta() - pf.eta()),2) + std::pow((muon.phi() - pf.phi()),2));
-                if(dR<0.01) n_match++;
+                if(dR<0.10) n_match++;
             }
         }
         if (n_match>0) isPFmatched = 1;

@@ -62,9 +62,11 @@ elif options.year == '2017':
 elif options.year == '2018' or options.year == '2018D':
     process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
 elif options.year == '2022':
-    process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
-elif options.year == '2023':
-    process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
+    #process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
+    process = cms.Process('NANO',eras.Run3)
+elif (options.year == '2023'):
+    #process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
+    process = cms.Process('NANO',eras.Run3)
 else:
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
@@ -541,7 +543,7 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                 # keeps only muons with at soft Quality flag
                                 softMuonsOnly = cms.bool(False),
                                 
-                                #Loosest cuts
+                                #Loosest cuts (get one-to-one with input collection)
                                 #filterMuon = cms.bool(False), 
                                 #dzForCleaning_wrtTrgMuon = cms.double(1.0),
 
@@ -793,14 +795,14 @@ else:
     process.llpnanoAOD_step = cms.Path(
         process.nanoSequenceMC+
         process.adaptedVertexing+
-        process.pfOnionTagInfos+
-        process.displacedGenVertexSequence+
+        process.pfOnionTagInfos
+        #process.displacedGenVertexSequence+
 
-        process.MCGenDecayInfo+
-        process.MCLabels+
+        #process.MCGenDecayInfo+
+        #process.MCLabels+
 
-        process.nanoTable+
-        process.nanoGenTable
+        #process.nanoTable+
+        #process.nanoGenTable
     )
 
     # B-parking additions
@@ -808,8 +810,8 @@ else:
     #process.llpnanoAOD_step += process.muonBParkMC # Not used currently
 
     # LHE
-    if options.addSignalLHE:
-        process.llpnanoAOD_step += process.lheWeightsTable
+    #if options.addSignalLHE:
+    #    process.llpnanoAOD_step += process.lheWeightsTable
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
