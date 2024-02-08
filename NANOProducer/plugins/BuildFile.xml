@@ -93,6 +93,10 @@
     <flags EDM_PLUGIN="1"/>
 </library>
 
+<library file="FourMuonVertexProducer.cc" name="FourMuonVertexProducerPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
 <!--flags CXXFLAGS="-g"
 <library   file="*.cc" name="PhysicsToolsBParkingNanoPlugins">
   <flags   EDM_PLUGIN="1"/>

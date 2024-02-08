@@ -58,9 +58,11 @@ options.parseArguments()
 if options.year == '2016':
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 elif options.year == '2017':
-    process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
+    #process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
+    process = cms.Process('NANO',eras.Run2_2017)
 elif options.year == '2018' or options.year == '2018D':
-    process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
+    #process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
+    process = cms.Process('NANO',eras.Run2_2018)
 else:
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 print "Selected year: ", options.year
@@ -91,7 +93,7 @@ else:
 
 # ------------------------------------------------------------------------
 # More options
-
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1000)
 )
@@ -131,11 +133,13 @@ files = {
 
 if len(options.inputFiles) > 0:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(options.inputFiles)
+        fileNames = cms.untracked.vstring(options.inputFiles),
+        bypassVersionCheck = cms.untracked.bool(True)
     )
 else:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
+        fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc']),
+        bypassVersionCheck = cms.untracked.bool(True)
     )
 
 # ------------------------------------------------------------------------
@@ -476,6 +480,17 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     svName  = cms.string("muonSV"),
 )
 
+process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
+    srcMuon = cms.InputTag("linkedObjects", "muons"),
+    #srcMuon = cms.InputTag("finalMuons"),
+    pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
+    dlenMin = cms.double(0),
+    dlenSigMin = cms.double(0),
+    ptMin   = cms.double(0.8),
+    svName  = cms.string("fourmuonSV"),
+)
+
 # process.muonVerticesCandidateTable =  cms.EDProducer("SimpleCandidateFlatTableProducer",
 #     src = cms.InputTag("muonVerticesTable"),
 #     cut = cms.string(""),  #DO NOT further cut here, use vertexTable.svCut
@@ -621,7 +636,7 @@ process.triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProduce
 # B-parking collection sequences
 process.muonBParkSequence  = cms.Sequence(process.muonTrgSelector)# * process.countTrgMuons)
 process.muonBParkTables    = cms.Sequence(process.muonBParkTable)
-process.muonVertexSequence = cms.Sequence(process.muonVerticesTable)
+process.muonVertexSequence = cms.Sequence(process.muonVerticesTable + process.fourmuonVerticesTable)
 process.muonTriggerMatchedTables = cms.Sequence(process.muonTriggerMatchedTable)   ####
 process.triggerObjectBParkTables = cms.Sequence(unpackedPatTrigger + process.triggerObjectBParkTable)
 #process.muonBParkMC       = cms.Sequence(process.muonsBParkMCMatchForTable + process.selectedMuonsMCMatchEmbedded + process.muonBParkMCTable)
@@ -736,6 +751,33 @@ modulesToRemove = [
     "genSubJetAK8Table",
     
 ]
+
+#Remove more modules
+#process.llpnanoAOD_step.remove(getattr(process, "lhcInfoTable"))
+process.nanoSequenceFS.remove(getattr(process, "particleLevelTables"))
+process.nanoSequenceFS.remove(getattr(process, "particleLevelSequence"))
+process.llpnanoAOD_step.remove(getattr(process, "electronMCTable"))
+#process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronMCTable"))
+process.llpnanoAOD_step.remove(getattr(process, "lheWeightsTable"))
+process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMC"))
+process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMCHiggsVtx"))
+process.llpnanoAOD_step.remove(getattr(process, "particleLevel"))
+#process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatching"))
+#process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatchingLowPt"))
+process.llpnanoAOD_step.remove(getattr(process, "tautagger"))
+#process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatching"))
+#process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatchingLowPt"))
+#process.llpnanoAOD_step.remove(getattr(process, "matchingElecPhoton"))
+#process.llpnanoAOD_step.remove(getattr(process, "matchingLowPtElecPhoton"))
+#process.llpnanoAOD_step.remove(getattr(process, "electronsMCMatchForTableAlt"))
+#process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronsMCMatchForTableAlt"))
+process.llpnanoAOD_step.remove(getattr(process, "genTable"))
+process.llpnanoAOD_step.remove(getattr(process, "genWeightsTable"))
+process.llpnanoAOD_step.remove(getattr(process, "rivetLeptonTable"))
+process.llpnanoAOD_step.remove(getattr(process, "rivetPhotonTable"))
+process.llpnanoAOD_step.remove(getattr(process, "rivetMetTable"))
+process.llpnanoAOD_step.remove(getattr(process, "HTXSCategoryTable"))
+process.llpnanoAOD_step.remove(getattr(process, "rivetProducerHTXS"))
 
 #override final jets
 
