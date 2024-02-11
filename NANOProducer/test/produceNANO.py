@@ -482,7 +482,7 @@ process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
 
 process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
     srcMuon = cms.InputTag("linkedObjects", "muons"),
-    #srcMuon = cms.InputTag("finalMuons"),
+    #srcMuon = cms.InputTag("finalMuons"), #Using "finalMuons" requires changing the producer input
     pvSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
     svCut   = cms.string(""),  # careful: adding a cut here would make the collection matching inconsistent with the SV table
     dlenMin = cms.double(0),

@@ -31,3 +31,6 @@
 *.out
 *.app
 *.pyc
+
+# Custom crab submit files
+crab_submit*.py
