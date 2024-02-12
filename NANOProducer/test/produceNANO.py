@@ -58,9 +58,11 @@ options.parseArguments()
 if options.year == '2016':
     process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 elif options.year == '2017':
-    process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
+    #process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
+    process = cms.Process('NANO',eras.Run2_2017)
 elif options.year == '2018' or options.year == '2018D':
-    process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
+    #process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_102Xv1)
+    process = cms.Process('NANO',eras.Run2_2018)
 elif options.year == '2022':
     #process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
     process = cms.Process('NANO',eras.Run3)
@@ -100,7 +102,7 @@ else:
 # More options
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
