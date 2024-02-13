@@ -7,9 +7,9 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO_scouting.py'
+config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO.py'
 config.JobType.maxMemoryMB = 2500
-config.JobType.pyCfgParams = ['year=2022', 'isData=True']
+config.JobType.pyCfgParams = ['year=2022', 'isData=True', 'mode=Scouting']
 
 config.Data.inputDataset = '/ScoutingPFRun3/Run2022F-v1/RAW'
 #Introduce blocks

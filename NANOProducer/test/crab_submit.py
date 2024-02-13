@@ -9,7 +9,7 @@ config.General.transferLogs = True
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO.py'
 config.JobType.maxMemoryMB = 2500
-config.JobType.pyCfgParams = ['year=2023', 'isData=True']
+config.JobType.pyCfgParams = ['year=2023', 'isData=True', 'mode=Offline']
 
 config.Data.inputDataset = '/ParkingDoubleMuonLowMass0/Run2023C-PromptReco-v4/MINIAOD'
 config.Data.inputDBS = 'global'
