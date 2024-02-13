@@ -95,7 +95,7 @@ else:
 # More options
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -442,7 +442,8 @@ Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5",
 #Path=["HLT_Mu9_IP6"]
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
-                                muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
+                                #muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD 
+                                muonCollection = cms.InputTag("linkedObjects", "muons"), #same collection as in muonSV                                                          
                                 bits = cms.InputTag("TriggerResults","","HLT"),
                                 prescales = cms.InputTag("patTrigger"),
                                 objects = cms.InputTag("slimmedPatTrigger"),
@@ -452,6 +453,7 @@ process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                 maxdR_matching = cms.double(0.1),
 
                                 ## for the output selected collection (tag + all compatible in dZ)
+                                #filterMuon is redundant since this version doesn't skip muons
                                 filterMuon = cms.bool(True),
                                 dzForCleaning_wrtTrgMuon = cms.double(1.0),
 
@@ -553,7 +555,7 @@ process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 #        toWhichHLTisMatched = Var("userInt('ToWhichHLTisMatched')",int,doc="To which HLT muons is the reco muon matched, -1 for probe" ),
         matched_dr = Var("userFloat('DR')",float,doc="dr with the matched triggering muon" ),
         matched_dpt = Var("userFloat('DPT')",float,doc="dpt/pt with the matched triggering muon" ),        #comma
-        skipMuon = Var("userInt('skipMuon')",bool,doc="Is muon skipped (due to large dZ w.r.t. trigger)?"),
+        passCuts = Var("userInt('passCuts')",bool,doc="Does the muon pass the pt and eta cuts, and is matched in dZ with the trigger muon?"),
         looseId = Var("userInt('looseId')",int,doc="reco muon is Loose"),
         fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
         fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),

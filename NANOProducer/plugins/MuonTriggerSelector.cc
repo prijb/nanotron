@@ -238,6 +238,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }
     //and now save the reco muon triggering or not 
     for(const pat::Muon & muon : *muons){
+        /*
         unsigned int iMuo(&muon - &(muons->at(0)) );
         if(muon.pt()<ptMin_) continue;
         if(fabs(muon.eta())>absEtaMax_) continue;
@@ -251,6 +252,23 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
             SkipMuon=false;
         }
         if(filterMuon_ && SkipMuon) continue;
+        */
+
+        //Modifying this so that the pt and eta cuts and cleaning reqs are in a quality flag called "passCuts"
+        unsigned int iMuo(&muon - &(muons->at(0)) );
+        if(muon.isLooseMuon()){loose_id[iMuo] = 1;}
+        int passCuts = 1;
+        if(muon.pt()<ptMin_) passCuts=0;
+        if(fabs(muon.eta())>absEtaMax_) passCuts=0;
+        //If this is true, the muon hasn't passed the cuts
+        bool faildzClean=true;
+        if(dzTrg_cleaning_<0) faildzClean=false;
+        if(debug && trgmuons_out->size()==0) std::cout <<"HERE!!" << endl;
+        for(const pat::Muon & trgmu : *trgmuons_out){
+            if(fabs(muon.vz()-trgmu.vz())> dzTrg_cleaning_ && dzTrg_cleaning_>0) continue;
+            faildzClean=false;
+        }
+        if(faildzClean) passCuts=0;
         
         const reco::TransientTrack muonTT((*(muon.bestTrack())),magneticField_); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
         if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
@@ -260,7 +278,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         muons_out->back().addUserFloat("DR",muonDR[iMuo]);
         muons_out->back().addUserFloat("DPT",muonDPT[iMuo]);
         muons_out->back().addUserInt("looseId",loose_id[iMuo]);
-        muons_out->back().addUserInt("skipMuon",SkipMuon);
+        muons_out->back().addUserInt("passCuts",passCuts);
 
         for(unsigned int i=0; i<HLTPaths_.size(); i++){muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);}
         trans_muons_out->emplace_back(muonTT);
