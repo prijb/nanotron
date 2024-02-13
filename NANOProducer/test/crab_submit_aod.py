@@ -7,9 +7,9 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO_AOD.py'
+config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO.py'
 config.JobType.maxMemoryMB = 2500
-config.JobType.pyCfgParams = ['year=2022', 'isData=False']
+config.JobType.pyCfgParams = ['year=2022', 'isData=False', 'mode=Scouting', 'format=AOD']
 
 config.Data.inputDataset = '/BsToJPsiPhi_JPsiToMuMu_PhiToKK_SoftQCDnonD_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22EEDRPremix-124X_mcRun3_2022_realistic_postEE_v1-v2/AODSIM'
 config.Data.inputDBS = 'global'

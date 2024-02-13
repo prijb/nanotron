@@ -31,7 +31,7 @@ options.register(
 
 options.register(
     'addSignalLHE',
-    True,
+    False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "adds LHE weights of signal samples"
@@ -122,12 +122,14 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 #The else here makes it compatible with CRAB submissions
 if len(options.inputFiles) > 0:
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(options.inputFiles)
+        fileNames = cms.untracked.vstring(options.inputFiles),
+        bypassVersionCheck = cms.untracked.bool(True)
     )
 else:
     process.source = cms.Source("PoolSource",
         #fileNames = cms.untracked.vstring(files[options.year]['data'] if options.isData else files[options.year]['mc'])
-        fileNames = cms.untracked.vstring()
+        fileNames = cms.untracked.vstring(),
+        bypassVersionCheck = cms.untracked.bool(True)
     )
 
 # ------------------------------------------------------------------------
@@ -737,6 +739,10 @@ if options.mode == 'Offline':
             + process.nanotronSequence
             #+ process.nanotronMCSequence    #Debugging
         )
+
+        # LHE
+        if options.addSignalLHE:
+            process.llpnanoAOD_step += process.lheWeightsTable
     
     process.llpnanoAOD_step += process.muonBParkSequence + process.muonBParkTables + process.muonTriggerMatchedTables + process.triggerObjectBParkTables + process.muonVertexSequence
 
@@ -754,6 +760,11 @@ if options.mode == 'Scouting':
             + process.muonVertexSequence
             + process.mcSequence
         )
+
+        # LHE
+        if options.addSignalLHE:
+            process.llpnanoAOD_step += process.lheWeightsTable
+
 
 process.endjob_step           = cms.EndPath(process.endOfProcess)
 process.NANOAODSIMoutput_step = cms.EndPath(process.NANOAODSIMoutput)
@@ -797,6 +808,34 @@ modulesToRemove = [
     "rivetProducerHTXS",
     "genSubJetAK8Table"
 ]
+
+#Remove more modules (for 2018)
+if options.year == '2018':
+    #process.llpnanoAOD_step.remove(getattr(process, "lhcInfoTable"))
+    process.nanoSequenceFS.remove(getattr(process, "particleLevelTables"))
+    process.nanoSequenceFS.remove(getattr(process, "particleLevelSequence"))
+    process.llpnanoAOD_step.remove(getattr(process, "electronMCTable"))
+    #process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronMCTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "lheWeightsTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMC"))
+    process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMCHiggsVtx"))
+    process.llpnanoAOD_step.remove(getattr(process, "particleLevel"))
+    #process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatching"))
+    #process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatchingLowPt"))
+    process.llpnanoAOD_step.remove(getattr(process, "tautagger"))
+    #process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatching"))
+    #process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatchingLowPt"))
+    #process.llpnanoAOD_step.remove(getattr(process, "matchingElecPhoton"))
+    #process.llpnanoAOD_step.remove(getattr(process, "matchingLowPtElecPhoton"))
+    #process.llpnanoAOD_step.remove(getattr(process, "electronsMCMatchForTableAlt"))
+    #process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronsMCMatchForTableAlt"))
+    process.llpnanoAOD_step.remove(getattr(process, "genTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "genWeightsTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "rivetLeptonTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "rivetPhotonTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "rivetMetTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "HTXSCategoryTable"))
+    process.llpnanoAOD_step.remove(getattr(process, "rivetProducerHTXS"))
 
 if options.mode == 'Offline':
     for moduleName in modulesToRemove:

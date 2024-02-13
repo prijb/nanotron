@@ -9,7 +9,7 @@ config.General.transferLogs = True
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'nanotron/NANOProducer/test/produceNANO.py'
 config.JobType.maxMemoryMB = 2500
-config.JobType.pyCfgParams = ['year=2022', 'isData=False']
+config.JobType.pyCfgParams = ['year=2022', 'isData=False', 'mode=Offline']
 
 config.Data.inputDataset = '/scenarioA_mpi_4_mA_1p33_ctau_10_2022/jleonhol-MINIAODSIM-dc87d0d68558bef75241a5a1b5633313/USER'
 config.Data.inputDBS = 'phys03'
