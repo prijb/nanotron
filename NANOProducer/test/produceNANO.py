@@ -61,6 +61,14 @@ options.register(
     "Offline or Scouting"
 )
 
+options.register(
+    'format',
+    'MINI',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "MINI or AOD"
+)
+
 options.parseArguments() 
 
 if options.year == '2016':
@@ -474,7 +482,16 @@ if options.mode == 'Scouting':
     
     process.scoutingSequence = cms.Sequence(process.gtStage2Digis + process.l1bits + process.electronSequence 
         + process.muonSequence + process.jetSequence + process.vertexSequence)
-    process.mcSequence = cms.Sequence(process.finalGenParticles + process.genParticleTable + process.muonsMCMatchForTable + process.muonMCTable)
+
+    #MC sequence depends on whether the input format is MINIAODSIM or AODSIM
+    if options.format == 'AOD':
+        #PAT conversion and Pruning necessary. Note: separate sequence since tasks and sequences can't be mixed in the same line 
+        process.load("Configuration.StandardSequences.PAT_cff")
+        process.patSequence = cms.Sequence(process.patTask)
+        process.mcSequence = cms.Sequence(process.patSequence + process.prunedGenParticles + process.finalGenParticles + process.genParticleTable + process.muonsMCMatchForTable + process.muonMCTable)
+
+    else:    
+        process.mcSequence = cms.Sequence(process.finalGenParticles + process.genParticleTable + process.muonsMCMatchForTable + process.muonMCTable)
 
     process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
         srcMuon = cms.InputTag("run3ScoutingMuonToPatMuon"),

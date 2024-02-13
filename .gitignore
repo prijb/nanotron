@@ -33,4 +33,4 @@
 *.pyc
 
 # Custom crab submit files
-crab_submit*.py
+NANOProducer/test/crab_submit*.py
