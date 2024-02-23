@@ -71,18 +71,35 @@ options.register(
 
 options.parseArguments() 
 
-if options.year == '2016':
-    process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
-elif options.year == '2017':
-    process = cms.Process('NANO',eras.Run2_2017)
-elif options.year == '2018' or options.year == '2018D':
-    process = cms.Process('NANO',eras.Run2_2018)
-elif options.year == '2022':
-    process = cms.Process('NANO',eras.Run3)
-elif (options.year == '2023'):
-    process = cms.Process('NANO',eras.Run3)
+#Caution: Choose eras based on MC/Data
+#Example: eras.Run3 works for MC, but eras.Run3,eras.run3_nanoAOD_122 for Data
+
+if options.isData:
+    if options.year == '2016':
+        process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
+    elif options.year == '2017':
+        process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
+    elif options.year == '2018' or options.year == '2018D':
+        process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
+    elif options.year == '2022':
+        process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
+    elif (options.year == '2023'):
+        process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
+    else:
+        process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 else:
-    process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
+    if options.year == '2016':
+        process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
+    elif options.year == '2017':
+        process = cms.Process('NANO',eras.Run2_2017)
+    elif options.year == '2018' or options.year == '2018D':
+        process = cms.Process('NANO',eras.Run2_2018)
+    elif options.year == '2022':
+        process = cms.Process('NANO',eras.Run3)
+    elif (options.year == '2023'):
+        process = cms.Process('NANO',eras.Run3)
+    else:
+        process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
 print("Selected year: ", options.year)
 
