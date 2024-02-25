@@ -61,12 +61,6 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             precision = cms.int32(6),
             type = cms.string('float')
         ),
-        dxybs = cms.PSet(
-            doc = cms.string('dxy (with sign) wrt the beam spot, in cm'),
-            expr = cms.string("1"),
-            precision = cms.int32(10),
-            type = cms.string('float')
-        ),
         dz = cms.PSet(
             doc = cms.string('dz (with sign) wrt first PV, in cm'),
             expr = cms.string("dB(\'PVDZ\')"),
@@ -83,30 +77,6 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             doc = cms.string('eta'),
             expr = cms.string('eta'),
             precision = cms.int32(12),
-            type = cms.string('float')
-        ),
-        highPtId = cms.PSet(
-            doc = cms.string('high-pT cut-based ID (1 = tracker high pT, 2 = global high pT, which includes tracker high pT)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        highPurity = cms.PSet(
-            doc = cms.string('inner track is high purity'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        inTimeMuon = cms.PSet(
-            doc = cms.string('inTimeMuon ID'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        ip3d = cms.PSet(
-            doc = cms.string('3D impact parameter wrt first PV, in cm'),
-            expr = cms.string("1"),
-            precision = cms.int32(10),
             type = cms.string('float')
         ),
         isGlobal = cms.PSet(
@@ -133,89 +103,11 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             precision = cms.int32(-1),
             type = cms.string('bool')
         ),
-        jetIdx = cms.PSet(
-            doc = cms.string('index of the associated jet (-1 if none)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('int16')
-        ),
-        jetNDauCharged = cms.PSet(
-            doc = cms.string('number of charged daughters of the closest jet'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        jetPtRelv2 = cms.PSet(
-            doc = cms.string('Relative momentum of the lepton with respect to the closest jet after subtracting the lepton'),
-            expr = cms.string("1"),
-            precision = cms.int32(8),
-            type = cms.string('float')
-        ),
-        jetRelIso = cms.PSet(
-            doc = cms.string('Relative isolation in matched jet (1/ptRatio-1, pfRelIso04_all if no matched jet)'),
-            expr = cms.string("1"),
-            precision = cms.int32(8),
-            type = cms.string('float')
-        ),
-        looseId = cms.PSet(
-            doc = cms.string('muon is loose muon'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
         mass = cms.PSet(
             doc = cms.string('mass'),
             expr = cms.string('mass'),
             precision = cms.int32(10),
             type = cms.string('float')
-        ),
-        mediumId = cms.PSet(
-            doc = cms.string('cut-based ID, medium WP'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        mediumPromptId = cms.PSet(
-            doc = cms.string('cut-based ID, medium prompt WP'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        miniIsoId = cms.PSet(
-            doc = cms.string('MiniIso ID from miniAOD selector (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        miniPFRelIso_all = cms.PSet(
-            doc = cms.string('mini PF relative isolation, total (with scaled rho*EA PU corrections)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('float')
-        ),
-        miniPFRelIso_chg = cms.PSet(
-            doc = cms.string('mini PF relative isolation, charged component'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('float')
-        ),
-        multiIsoId = cms.PSet(
-            doc = cms.string('MultiIsoId from miniAOD selector (1=MultiIsoLoose, 2=MultiIsoMedium)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        mvaMuID = cms.PSet(
-            doc = cms.string('MVA-based ID score '),
-            expr = cms.string('1'),
-            precision = cms.int32(6),
-            type = cms.string('float')
-        ),
-        mvaMuID_WP = cms.PSet(
-            doc = cms.string('MVA-based ID selector WPs (1=MVAIDwpMedium,2=MVAIDwpTight)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
         ),
         nStations = cms.PSet(
             doc = cms.string('number of matched stations with default arbitration (segment & track)'),
@@ -223,42 +115,6 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             #expr = cms.string("1"),
             precision = cms.int32(-1),
             type = cms.string('uint8')
-        ),
-        nTrackerLayers = cms.PSet(
-            doc = cms.string('number of layers in the tracker'),
-            expr = cms.string('1'),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        pdgId = cms.PSet(
-            doc = cms.string('PDG code assigned by the event reconstruction (not by MC truth)'),
-            expr = cms.string('1'),
-            precision = cms.int32(-1),
-            type = cms.string('int')
-        ),
-        pfIsoId = cms.PSet(
-            doc = cms.string('PFIso ID from miniAOD selector (1=PFIsoVeryLoose, 2=PFIsoLoose, 3=PFIsoMedium, 4=PFIsoTight, 5=PFIsoVeryTight, 6=PFIsoVeryVeryTight)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        pfRelIso03_all = cms.PSet(
-            doc = cms.string('PF relative isolation dR=0.3, total (deltaBeta corrections)'),
-            expr = cms.string('1'),
-            precision = cms.int32(-1),
-            type = cms.string('float')
-        ),
-        pfRelIso03_chg = cms.PSet(
-            doc = cms.string('PF relative isolation dR=0.3, charged component'),
-            expr = cms.string('1'),
-            precision = cms.int32(-1),
-            type = cms.string('float')
-        ),
-        pfRelIso04_all = cms.PSet(
-            doc = cms.string('PF relative isolation dR=0.4, total (deltaBeta corrections)'),
-            expr = cms.string('1'),
-            precision = cms.int32(-1),
-            type = cms.string('float')
         ),
         phi = cms.PSet(
             doc = cms.string('phi'),
@@ -270,90 +126,6 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             doc = cms.string('pt'),
             expr = cms.string('pt'),
             precision = cms.int32(-1),
-            type = cms.string('float')
-        ),
-        ptErr = cms.PSet(
-            doc = cms.string('ptError of the muon track'),
-            expr = cms.string('1'),
-            precision = cms.int32(6),
-            type = cms.string('float')
-        ),
-        puppiIsoId = cms.PSet(
-            doc = cms.string('PuppiIsoId from miniAOD selector (1=Loose, 2=Medium, 3=Tight)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        segmentComp = cms.PSet(
-            doc = cms.string('muon segment compatibility'),
-            expr = cms.string('1'),
-            precision = cms.int32(14),
-            type = cms.string('float')
-        ),
-        sip3d = cms.PSet(
-            doc = cms.string('3D impact parameter significance wrt first PV'),
-            expr = cms.string("1"),
-            precision = cms.int32(10),
-            type = cms.string('float')
-        ),
-        softId = cms.PSet(
-            doc = cms.string('soft cut-based ID'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        softMva = cms.PSet(
-            doc = cms.string('soft MVA ID score'),
-            expr = cms.string('1'),
-            precision = cms.int32(6),
-            type = cms.string('float')
-        ),
-        softMvaId = cms.PSet(
-            doc = cms.string('soft MVA ID'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        svIdx = cms.PSet(
-            doc = cms.string('index of matching secondary vertex'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('int16')
-        ),
-        tightCharge = cms.PSet(
-            doc = cms.string('Tight charge criterion using pterr/pt of muonBestTrack (0:fail, 2:pass)'),
-            expr = cms.string('1'),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        tightId = cms.PSet(
-            doc = cms.string('cut-based ID, tight WP'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        tkIsoId = cms.PSet(
-            doc = cms.string('TkIso ID (1=TkIsoLoose, 2=TkIsoTight)'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('uint8')
-        ),
-        tkRelIso = cms.PSet(
-            doc = cms.string('Tracker-based relative isolation dR=0.3 for highPt, trkIso/tunePpt'),
-            expr = cms.string('1'),
-            precision = cms.int32(6),
-            type = cms.string('float')
-        ),
-        triggerIdLoose = cms.PSet(
-            doc = cms.string('TriggerIdLoose ID'),
-            expr = cms.string("1"),
-            precision = cms.int32(-1),
-            type = cms.string('bool')
-        ),
-        tunepRelPt = cms.PSet(
-            doc = cms.string('TuneP relative pt, tunePpt/pt'),
-            expr = cms.string('1'),
-            precision = cms.int32(6),
             type = cms.string('float')
         ),
         vx = cms.PSet(

@@ -249,7 +249,8 @@ from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 
 #Loading Scouting to PAT sequences
 process.load('nanotron.Scouting.scoutingelectron_cff')
-process.load('nanotron.Scouting.scoutingjet_cff')
+#process.load('nanotron.Scouting.scoutingjet_cff')
+process.load('nanotron.Scouting.scoutingjet_test_cff') #Test sequence
 process.load('nanotron.Scouting.scoutingmuon_cff')
 process.load('nanotron.Scouting.scoutingvertices_cff')
 
