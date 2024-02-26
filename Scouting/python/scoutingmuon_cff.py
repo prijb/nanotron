@@ -272,6 +272,48 @@ ScoutingMuonTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
             expr = cms.string("userInt('vtxidx')"),
             precision = cms.int32(-1),
             type = cms.string('int')
+        ),
+        hitCount = cms.PSet(
+            doc = cms.string('hitCount'),
+            expr = cms.string("userInt('hitCount')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        beginTrackHits = cms.PSet(
+            doc = cms.string('beginTrackHits'),
+            expr = cms.string("userInt('beginTrackHits')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        endTrackHits = cms.PSet(
+            doc = cms.string('endTrackHits'),
+            expr = cms.string("userInt('endTrackHits')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        beginInner = cms.PSet(
+            doc = cms.string('beginInner'),
+            expr = cms.string("userInt('beginInner')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        endInner = cms.PSet(
+            doc = cms.string('endInner'),
+            expr = cms.string("userInt('endInner')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        beginOuter = cms.PSet(
+            doc = cms.string('beginOuter'),
+            expr = cms.string("userInt('beginOuter')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
+        ),
+        endOuter = cms.PSet(
+            doc = cms.string('endOuter'),
+            expr = cms.string("userInt('endOuter')"),
+            precision = cms.int32(-1),
+            type = cms.string('int')
         )
     )
 )

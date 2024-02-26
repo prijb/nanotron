@@ -150,6 +150,14 @@ void Run3ScoutingMuonToPatMuonProducer::produce(edm::Event &iEvent, const edm::E
         patmuon.addUserInt("nTrackerLayersWithMeasurement", muon.nTrackerLayersWithMeasurement());
         //Add vertex index
         patmuon.addUserInt("vtxidx", sv_idx);
+        //Add hit pattern entries
+        patmuon.addUserInt("hitCount", (muon.trk_hitPattern()).hitCount);
+        patmuon.addUserInt("beginTrackHits", (muon.trk_hitPattern()).beginTrackHits);
+        patmuon.addUserInt("endTrackHits", (muon.trk_hitPattern()).endTrackHits);
+        patmuon.addUserInt("beginInner", (muon.trk_hitPattern()).beginInner);
+        patmuon.addUserInt("endInner", (muon.trk_hitPattern()).endInner);
+        patmuon.addUserInt("beginOuter", (muon.trk_hitPattern()).beginOuter);
+        patmuon.addUserInt("endOuter", (muon.trk_hitPattern()).endOuter);
         patMuons->push_back(patmuon);
     }
     auto coll = iEvent.put(std::move(patMuons));

@@ -3,7 +3,7 @@ from  PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.NanoAOD.run3scouting_cff import *
 from PhysicsTools.NanoAOD.simpleCandidateFlatTableProducer_cfi import simpleCandidateFlatTableProducer
 
-#These are imported from https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/custom_run3scouting_cff.py (by A. Linutolo)
+#These are imported from https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/custom_run3scouting_cff.py (by A. Lintuluoto)
 particleTask = cms.Task(scoutingPFCands)
 
 #ak4JetTableTask = cms.Task(ak4ScoutingJets,ak4ScoutingJetParticleNetJetTagInfos,ak4ScoutingJetParticleNetJetTags,ak4ScoutingJetTable)

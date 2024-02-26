@@ -252,7 +252,9 @@ process.load('nanotron.Scouting.scoutingelectron_cff')
 #process.load('nanotron.Scouting.scoutingjet_cff')
 process.load('nanotron.Scouting.scoutingjet_test_cff') #Test sequence
 process.load('nanotron.Scouting.scoutingmuon_cff')
-process.load('nanotron.Scouting.scoutingvertices_cff')
+#process.load('nanotron.Scouting.scoutingvertices_cff')
+process.load('nanotron.Scouting.scoutingvertices_test_cff') #Test sequence
+process.load('nanotron.Scouting.scoutingglobal_cff')
 
 #General configs (base + nanotron + muonSV)
 #Configs from nano_cff and nanotron loaded only for "offline" 
@@ -501,7 +503,7 @@ if options.mode == 'Scouting':
     )
     
     process.scoutingSequence = cms.Sequence(process.gtStage2Digis + process.l1bits + process.electronSequence 
-        + process.muonSequence + process.jetSequence + process.vertexSequence)
+        + process.muonSequence + process.jetSequence + process.vertexSequence + process.globalSequence)
 
     #MC sequence depends on whether the input format is MINIAODSIM or AODSIM
     if options.format == 'AOD':
