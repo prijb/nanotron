@@ -131,7 +131,7 @@ else:
 # More options
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10000)
 )
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
@@ -827,35 +827,70 @@ modulesToRemove = [
 ]
 
 #Remove more modules (for 2018?)
+#Check how much we can get in common for data vs MC
 if (options.year == '2018'):
     if options.isData:
         process.llpnanoAOD_step.remove(getattr(process, "lhcInfoTable"))
+        #Testing removing some problematic processes
+        run2_nanoAOD_106Xv2.toModify(
+            process.finalTaus,
+            cut = cms.string("pt > 18")
+        )
+        #Gets rid of low pT electrons in cross linker
+        run2_nanoAOD_106Xv2.toModify(
+            process.linkedObjects, lowPtElectrons=None
+        )
+        #Using slimmed electrons instead of final electrons in cross linker since adding MVA user data breaks things
+        run2_nanoAOD_106Xv2.toModify(
+            process.linkedObjects, electrons=cms.InputTag("slimmedElectrons")
+        )
+        #process.nanoSequence.remove(process.lowPtElectronTablesTask)
+        #run2_nanoAOD_106Xv2.toModify(
+        #    process.lowPtElectronTable, src = cms.InputTag("slimmedLowPtElectrons")
+        #)
+
+        #delattr(process.jetTable.variables)
+        #Removing problematic tables
+        del process.jetTable.variables.hfadjacentEtaStripsSize
+        del process.jetTable.variables.hfcentralEtaStripSize
+        del process.jetTable.variables.hfsigmaEtaEta
+        del process.jetTable.variables.hfsigmaPhiPhi
+        del process.multiRPTable
+        del process.protonTable
+        del process.lowPtElectronTable
+        #Could probably preserve the electron table if I removed the MVA variables one by one or fixed the MVA assignment
+        del process.electronTable
+        del process.isoTrackTable
+
+        #process.nanoSequence.remove(process.nanoSequenceOnlyData)
+
     else:
+        print("blah")
         #process.llpnanoAOD_step.remove(getattr(process, "lhcInfoTable"))
-        process.nanoSequenceFS.remove(getattr(process, "particleLevelTables"))
-        process.nanoSequenceFS.remove(getattr(process, "particleLevelSequence"))
-        process.llpnanoAOD_step.remove(getattr(process, "electronMCTable"))
+        #process.nanoSequenceFS.remove(getattr(process, "particleLevelTables"))
+        #process.nanoSequenceFS.remove(getattr(process, "particleLevelSequence"))
+        #process.llpnanoAOD_step.remove(getattr(process, "electronMCTable"))
         #process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronMCTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "lheWeightsTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMC"))
-        process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMCHiggsVtx"))
-        process.llpnanoAOD_step.remove(getattr(process, "particleLevel"))
+        #process.llpnanoAOD_step.remove(getattr(process, "lheWeightsTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMC"))
+        #process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMCHiggsVtx"))
+        #process.llpnanoAOD_step.remove(getattr(process, "particleLevel"))
         #process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatching"))
         #process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatchingLowPt"))
-        process.llpnanoAOD_step.remove(getattr(process, "tautagger"))
+        #process.llpnanoAOD_step.remove(getattr(process, "tautagger"))
         #process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatching"))
         #process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatchingLowPt"))
         #process.llpnanoAOD_step.remove(getattr(process, "matchingElecPhoton"))
         #process.llpnanoAOD_step.remove(getattr(process, "matchingLowPtElecPhoton"))
         #process.llpnanoAOD_step.remove(getattr(process, "electronsMCMatchForTableAlt"))
         #process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronsMCMatchForTableAlt"))
-        process.llpnanoAOD_step.remove(getattr(process, "genTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "genWeightsTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "rivetLeptonTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "rivetPhotonTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "rivetMetTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "HTXSCategoryTable"))
-        process.llpnanoAOD_step.remove(getattr(process, "rivetProducerHTXS"))
+        #process.llpnanoAOD_step.remove(getattr(process, "genTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "genWeightsTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "rivetLeptonTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "rivetPhotonTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "rivetMetTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "HTXSCategoryTable"))
+        #process.llpnanoAOD_step.remove(getattr(process, "rivetProducerHTXS"))
 
 if options.mode == 'Offline':
     for moduleName in modulesToRemove:
