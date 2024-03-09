@@ -87,6 +87,7 @@ if options.isData:
         process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
     else:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
+
 else:
     if options.year == '2016':
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
