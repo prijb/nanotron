@@ -79,7 +79,7 @@ if options.isData:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
     elif options.year == '2017':
         process = cms.Process('NANO',eras.Run2_2017,eras.run2_nanoAOD_94XMiniAODv2)
-    elif options.year == '2018' or options.year == '2018D':
+    elif options.year == '2018' or options.year == '2018D' or options.year == "2018UL":
         process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
     elif options.year == '2022':
         process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
@@ -92,8 +92,9 @@ else:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
     elif options.year == '2017':
         process = cms.Process('NANO',eras.Run2_2017)
-    elif options.year == '2018' or options.year == '2018D':
-        process = cms.Process('NANO',eras.Run2_2018)
+    elif options.year == '2018' or options.year == '2018D' or options.year == "2018UL":
+        #process = cms.Process('NANO',eras.Run2_2018)
+        process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
     elif options.year == '2022':
         process = cms.Process('NANO',eras.Run3)
     elif (options.year == '2023'):
@@ -225,6 +226,8 @@ if options.isData:
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_v13', '')
     elif options.year == '2018D':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16', '')
+    elif options.year == '2018UL':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '')
     elif options.year == '2022':
         process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
     elif options.year == '2023':
@@ -235,7 +238,7 @@ else:
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mcRun2_asymptotic_v8', '')
     elif options.year == '2017':
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mc2017_realistic_v8', '')
-    elif options.year == '2018' or options.year == '2018D':
+    elif options.year == '2018' or options.year == '2018D' or options.year == "2018UL":
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
     elif options.year == '2022':
         process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2022_realistic_postEE_v1', '')
@@ -828,69 +831,79 @@ modulesToRemove = [
 
 #Remove more modules (for 2018?)
 #Check how much we can get in common for data vs MC
-if (options.year == '2018'):
-    if options.isData:
-        process.llpnanoAOD_step.remove(getattr(process, "lhcInfoTable"))
-        #Testing removing some problematic processes
-        run2_nanoAOD_106Xv2.toModify(
-            process.finalTaus,
-            cut = cms.string("pt > 18")
-        )
-        #Gets rid of low pT electrons in cross linker
-        run2_nanoAOD_106Xv2.toModify(
-            process.linkedObjects, lowPtElectrons=None
-        )
-        #Using slimmed electrons instead of final electrons in cross linker since adding MVA user data breaks things
+if (options.year == '2018' or options.year == "2018UL"):
+    #Delete processes common to data and MC
+    del process.lhcInfoTable
+
+    #Modify the collections
+    #Simplifying tau cut because some of the MVAs don't work
+    run2_nanoAOD_106Xv2.toModify(
+        process.finalTaus,
+        cut = cms.string("pt > 18")
+    )
+    #Gets rid of low pT electrons in cross linker
+    run2_nanoAOD_106Xv2.toModify(
+        process.linkedObjects, lowPtElectrons=None
+    )
+
+    if options.year == '2018':
+        #Using slimmed electrons instead of final electrons in cross linker since in case adding MVA user data breaks things -> Make sure to remove the electron table if you do this
         run2_nanoAOD_106Xv2.toModify(
             process.linkedObjects, electrons=cms.InputTag("slimmedElectrons")
         )
-        #process.nanoSequence.remove(process.lowPtElectronTablesTask)
-        #run2_nanoAOD_106Xv2.toModify(
-        #    process.lowPtElectronTable, src = cms.InputTag("slimmedLowPtElectrons")
-        #)
-
-        #delattr(process.jetTable.variables)
-        #Removing problematic tables
-        del process.jetTable.variables.hfadjacentEtaStripsSize
-        del process.jetTable.variables.hfcentralEtaStripSize
-        del process.jetTable.variables.hfsigmaEtaEta
-        del process.jetTable.variables.hfsigmaPhiPhi
-        del process.multiRPTable
-        del process.protonTable
-        del process.lowPtElectronTable
-        #Could probably preserve the electron table if I removed the MVA variables one by one or fixed the MVA assignment
         del process.electronTable
-        del process.isoTrackTable
+    
+    if options.year == '2018UL':
+        #Modifying electron MVA assignment
+        run2_nanoAOD_106Xv2.toModify(
+            process.electronMVATTH.variables,
+            LepGood_pt = cms.string("pt"),
+            LepGood_eta = cms.string("eta"),
+            LepGood_jetNDauChargedMVASel = cms.string("?userCand('jetForLepJetVar').isNonnull()?userFloat('jetNDauChargedMVASel'):0"),
+            LepGood_miniRelIsoCharged = None,
+            LepGood_miniRelIsoNeutral = None,
+            LepGood_jetPtRelv2 = cms.string("?userCand('jetForLepJetVar').isNonnull()?userFloat('ptRel'):0"),
+            LepGood_jetDF = cms.string("?userCand('jetForLepJetVar').isNonnull()?max(userCand('jetForLepJetVar').bDiscriminator('pfDeepFlavourJetTags:probbb')+userCand('jetForLepJetVar').bDiscriminator('pfDeepFlavourJetTags:probb')+userCand('jetForLepJetVar').bDiscriminator('pfDeepFlavourJetTags:problepb'),0.0):0.0"),
+            LepGood_jetPtRatio = None,
+            LepGood_dxy = cms.string("log(abs(dB('PV2D')))"),
+            LepGood_sip3d = cms.string("abs(dB('PV3D')/edB('PV3D'))"),
+            LepGood_dz = cms.string("log(abs(dB('PVDZ')))"),
+            LepGood_mvaFall17V2noIso = None
+        )
 
-        #process.nanoSequence.remove(process.nanoSequenceOnlyData)
+    #Removing problematic jet variables
+    del process.jetTable.variables.hfadjacentEtaStripsSize
+    del process.jetTable.variables.hfcentralEtaStripSize
+    del process.jetTable.variables.hfsigmaEtaEta
+    del process.jetTable.variables.hfsigmaPhiPhi
+    #Remove proton tables
+    del process.singleRPTable
+    del process.multiRPTable
+    del process.protonTable
+    #Remove low pT electrons
+    del process.lowPtElectronTable
+    #Could probably preserve the electron table if I removed the MVA variables one by one or fixed the MVA assignment
+    del process.isoTrackTable
+
+    if options.isData:
+        print("Removing data specific modules")
 
     else:
-        print("blah")
-        #process.llpnanoAOD_step.remove(getattr(process, "lhcInfoTable"))
-        #process.nanoSequenceFS.remove(getattr(process, "particleLevelTables"))
-        #process.nanoSequenceFS.remove(getattr(process, "particleLevelSequence"))
-        #process.llpnanoAOD_step.remove(getattr(process, "electronMCTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronMCTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "lheWeightsTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMC"))
-        #process.llpnanoAOD_step.remove(getattr(process, "genParticles2HepMCHiggsVtx"))
-        #process.llpnanoAOD_step.remove(getattr(process, "particleLevel"))
-        #process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatching"))
-        #process.llpnanoAOD_step.remove(getattr(process, "particleLevelForMatchingLowPt"))
-        #process.llpnanoAOD_step.remove(getattr(process, "tautagger"))
-        #process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatching"))
-        #process.llpnanoAOD_step.remove(getattr(process, "tautaggerForMatchingLowPt"))
-        #process.llpnanoAOD_step.remove(getattr(process, "matchingElecPhoton"))
-        #process.llpnanoAOD_step.remove(getattr(process, "matchingLowPtElecPhoton"))
-        #process.llpnanoAOD_step.remove(getattr(process, "electronsMCMatchForTableAlt"))
-        #process.llpnanoAOD_step.remove(getattr(process, "lowPtElectronsMCMatchForTableAlt"))
-        #process.llpnanoAOD_step.remove(getattr(process, "genTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "genWeightsTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "rivetLeptonTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "rivetPhotonTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "rivetMetTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "HTXSCategoryTable"))
-        #process.llpnanoAOD_step.remove(getattr(process, "rivetProducerHTXS"))
+        print("Removing MC specific modules")    
+        del process.genWeightsTable
+        del process.genTable
+        del process.particleLevel
+        del process.lheWeightsTable
+        del process.electronMCTable
+        del process.lowPtElectronMCTable
+        del process.genParticles2HepMC
+        del process.genParticles2HepMCHiggsVtx
+        del process.tautagger
+        del process.rivetLeptonTable
+        del process.rivetPhotonTable
+        del process.rivetMetTable
+        del process.HTXSCategoryTable
+        del process.rivetProducerHTXS
 
 if options.mode == 'Offline':
     for moduleName in modulesToRemove:
