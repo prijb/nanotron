@@ -31,3 +31,10 @@
 *.out
 *.app
 *.pyc
+
+# Custom crab submit files
+NANOProducer/test/crab_submit_scouting.py
+NANOProducer/test/crab_submit_mc.py
+NANOProducer/test/crab_submit_aod.py
+NANOProducer/test/crab_submit.py
+
