@@ -49,6 +49,15 @@ scram build clean
 scram build
 ```
 
+List of commands for producing processed Run 2 data trees (use common config but with year=2018 or 2018UL option)
+```
+cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2018B/ParkingBPH1/MINIAOD/05May2019-v2/230000/00496A25-08B6-FB4E-9681-D5FF4E1BE81F.root year=2018 isData=True mode=Offline
+
+cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/2430000/0009F6DE-C68E-1E48-8F6D-5603C0B9F215.root year=2018UL isData=True mode=Offline 
+
+cmsRun nanotron/NANOProducer/test/produceNANO.py inputFiles=/store/user/jleonhol/samples/MINIAODSIM/scenarioB1_mpi_4_mA_1p33_ctau_10/MINIAODSIM/231218_121254/0000/miniAOD_1.root year=2018UL isData=False mode=Offline
+```
+
 List of commands for producing processed Run 3 data trees (common config with option for Offline and Scouting datasets)
 Use format=AOD for files that are in AODSIM
 ```
