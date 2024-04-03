@@ -458,7 +458,27 @@ if options.mode == 'Offline':
 #Adding the gen table and muon matching tasks manually from genparticles_cff and muons_cff
 if options.mode == 'Scouting':
     process.load("EventFilter.L1TRawToDigi.gtStage2Digis_cfi")
+    process.load("EventFilter.L1TRawToDigi.gmtStage2Digis_cfi") #L1 muons obtained from GMT
+    #process.load("PhysicsTools.NanoAOD.l1trig_cff")
+
     process.gtStage2Digis.InputLabel = cms.InputTag( "hltFEDSelectorL1" )
+    process.gmtStage2Digis.InputLabel = cms.InputTag( "hltFEDSelectorL1" )
+
+    #(To fix: Gives empty collections)
+    process.l1MuTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+        cut = cms.string(""),
+        doc = cms.string("L1 muons"),
+        name = cms.string("L1Muon"),
+        src = cms.InputTag("gmtStage2Digis","Muon"),
+        extension = cms.bool(False),
+        variables = cms.PSet(
+            pt = Var("pt", float, doc="transverse momentum", precision=10),
+            eta = Var("eta", float, doc="pseudorapidity", precision=10),
+            phi = Var("phi", float, doc="azimuthal angle", precision=10)
+        )
+    )
+
+    process.l1MuonSequence = cms.Sequence(process.l1MuTable)
 
     #Different source from normal configs (probably should just clone for simplicity)
     process.finalGenParticles = cms.EDProducer("GenParticlePruner",
@@ -502,7 +522,7 @@ if options.mode == 'Scouting':
         docString = cms.string("MC matching to status==1 muons"),
     )
     
-    process.scoutingSequence = cms.Sequence(process.gtStage2Digis + process.l1bits + process.electronSequence 
+    process.scoutingSequence = cms.Sequence(process.l1MuonSequence + process.electronSequence 
         + process.muonSequence + process.jetSequence + process.vertexSequence + process.globalSequence)
 
     #MC sequence depends on whether the input format is MINIAODSIM or AODSIM
@@ -543,64 +563,8 @@ if options.mode == 'Offline':
 
     if options.year in ['2022', '2023']:
         Path = [
-            'HLT_Dimuon0_Jpsi3p5_Muon2',
-            'HLT_Dimuon0_Jpsi_L1_4R_0er1p5R',
-            'HLT_Dimuon0_Jpsi_L1_NoOS',
-            'HLT_Dimuon0_Jpsi_NoVertexing_L1_4R_0er1p5R',
-            'HLT_Dimuon0_Jpsi_NoVertexing_NoOS',
-            'HLT_Dimuon0_Jpsi_NoVertexing',
-            'HLT_Dimuon0_Jpsi',
-            'HLT_Dimuon0_LowMass_L1_0er1p5R',
-            'HLT_Dimuon0_LowMass_L1_0er1p5',
-            'HLT_Dimuon0_LowMass_L1_4R',
-            'HLT_Dimuon0_LowMass_L1_4',
-            'HLT_Dimuon0_LowMass_L1_TM530',
-            'HLT_Dimuon0_LowMass',
-            'HLT_Dimuon0_Upsilon_L1_4p5',
-            'HLT_Dimuon0_Upsilon_L1_4p5er2p0M',
-            'HLT_Dimuon0_Upsilon_L1_4p5er2p0',
-            'HLT_Dimuon0_Upsilon_Muon_NoL1Mass',
-            'HLT_Dimuon0_Upsilon_NoVertexing',
-            'HLT_Dimuon10_Upsilon_y1p4',
-            'HLT_Dimuon12_Upsilon_y1p4',
-            'HLT_Dimuon14_Phi_Barrel_Seagulls',
-            'HLT_Dimuon14_PsiPrime_noCorrL1',
-            'HLT_Dimuon14_PsiPrime',
-            'HLT_Dimuon18_PsiPrime_noCorrL1',
-            'HLT_Dimuon18_PsiPrime',
-            'HLT_Dimuon24_Phi_noCorrL1',
-            'HLT_Dimuon24_Upsilon_noCorrL1',
-            'HLT_Dimuon25_Jpsi_noCorrL1',
-            'HLT_Dimuon25_Jpsi',
-            'HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05',
-            'HLT_DoubleMu3_DoubleEle7p5_CaloIdL_TrackIdL_Upsilon',
-            'HLT_DoubleMu3_TkMu_DsTau3Mu',
-            'HLT_DoubleMu3_Trk_Tau3mu_NoL1Mass',
-            'HLT_DoubleMu3_Trk_Tau3mu',
-            'HLT_DoubleMu4_3_Bs',
-            'HLT_DoubleMu4_3_Displaced_Photon4_BsToMMG',
-            'HLT_DoubleMu4_3_Jpsi',
             'HLT_DoubleMu4_3_LowMass',
-            'HLT_DoubleMu4_3_Photon4_BsToMMG',
-            'HLT_DoubleMu4_JpsiTrkTrk_Displaced',
-            'HLT_DoubleMu4_JpsiTrk_Bc',
-            'HLT_DoubleMu4_Jpsi_Displaced',
-            'HLT_DoubleMu4_Jpsi_NoVertexing',
-            'HLT_DoubleMu4_LowMass_Displaced',
-            'HLT_DoubleMu4_MuMuTrk_Displaced',
-            'HLT_DoubleMu5_Upsilon_DoubleEle3_CaloIdL_TrackIdL',
-            'HLT_Mu25_TkMu0_Phi',
-            'HLT_Mu30_TkMu0_Psi',
-            'HLT_Mu30_TkMu0_Upsilon',
-            'HLT_Mu4_L1DoubleMu',
-            'HLT_Mu7p5_L2Mu2_Jpsi',
-            'HLT_Mu7p5_L2Mu2_Upsilon',
-            'HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1',
-            'HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15',
-            'HLT_Tau3Mu_Mu7_Mu1_TkMu1_Tau15_Charge1',
-            'HLT_Tau3Mu_Mu7_Mu1_TkMu1_Tau15',
-            'HLT_Trimuon5_3p5_2_Upsilon_Muon',
-            'HLT_TrimuonOpen_5_3p5_2_Upsilon_Muon'
+            'HLT_DoubleMu4_LowMass_Displaced'
         ]
     
     process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
@@ -769,12 +733,14 @@ if options.mode == 'Offline':
 if options.mode == 'Scouting':
     if options.isData:
         process.llpnanoAOD_step = cms.Path(process.gtStage2Digis 
+            + process.gmtStage2Digis
             + process.l1bits 
             + process.scoutingSequence
             + process.muonVertexSequence
         )
     else:
         process.llpnanoAOD_step = cms.Path(process.gtStage2Digis 
+            + process.gmtStage2Digis
             + process.l1bits 
             + process.scoutingSequence
             + process.muonVertexSequence
