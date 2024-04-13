@@ -458,27 +458,28 @@ if options.mode == 'Offline':
 #Adding the gen table and muon matching tasks manually from genparticles_cff and muons_cff
 if options.mode == 'Scouting':
     process.load("EventFilter.L1TRawToDigi.gtStage2Digis_cfi")
-    process.load("EventFilter.L1TRawToDigi.gmtStage2Digis_cfi") #L1 muons obtained from GMT
-    #process.load("PhysicsTools.NanoAOD.l1trig_cff")
+    from PhysicsTools.NanoAOD.l1trig_cff import *
 
     process.gtStage2Digis.InputLabel = cms.InputTag( "hltFEDSelectorL1" )
-    process.gmtStage2Digis.InputLabel = cms.InputTag( "hltFEDSelectorL1" )
 
     #(To fix: Gives empty collections)
-    process.l1MuTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-        cut = cms.string(""),
-        doc = cms.string("L1 muons"),
-        name = cms.string("L1Muon"),
-        src = cms.InputTag("gmtStage2Digis","Muon"),
-        extension = cms.bool(False),
-        variables = cms.PSet(
-            pt = Var("pt", float, doc="transverse momentum", precision=10),
-            eta = Var("eta", float, doc="pseudorapidity", precision=10),
-            phi = Var("phi", float, doc="azimuthal angle", precision=10)
-        )
-    )
+    #process.l1MuTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    #    cut = cms.string(""),
+    #    doc = cms.string("L1 muons"),
+    #    name = cms.string("L1Muon"),
+    #    src = cms.InputTag("gtStage2Digis","Muon"),
+    #    extension = cms.bool(False),
+    #    variables = cms.PSet(
+    #        pt = Var("pt", float, doc="transverse momentum", precision=10),
+    #        eta = Var("eta", float, doc="pseudorapidity", precision=10),
+    #        phi = Var("phi", float, doc="azimuthal angle", precision=10)
+    #    )
+    #)
 
-    process.l1MuonSequence = cms.Sequence(process.l1MuTable)
+    process.l1MuScoutingTable = l1MuTable.clone(src = cms.InputTag("gtStage2Digis","Muon"))
+    process.l1MuScoutingTable.variables = cms.PSet(l1MuonReducedVars)
+
+    process.l1MuonSequence = cms.Sequence(process.l1MuScoutingTable)
 
     #Different source from normal configs (probably should just clone for simplicity)
     process.finalGenParticles = cms.EDProducer("GenParticlePruner",
@@ -733,14 +734,12 @@ if options.mode == 'Offline':
 if options.mode == 'Scouting':
     if options.isData:
         process.llpnanoAOD_step = cms.Path(process.gtStage2Digis 
-            + process.gmtStage2Digis
             + process.l1bits 
             + process.scoutingSequence
             + process.muonVertexSequence
         )
     else:
         process.llpnanoAOD_step = cms.Path(process.gtStage2Digis 
-            + process.gmtStage2Digis
             + process.l1bits 
             + process.scoutingSequence
             + process.muonVertexSequence
