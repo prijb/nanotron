@@ -58,6 +58,49 @@
 #include "RecoVertex/VertexPrimitives/interface/VertexState.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 
+// Additional includes for material veto
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+
+#include "DataFormats/TrackReco/interface/HitPattern.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+#include "DataFormats/GeometrySurface/interface/PlaneBuilder.h"
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "DataFormats/GeometryVector/interface/GlobalVector.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "MagneticField/VolumeGeometry/interface/MagVolumeOutsideValidity.h"
+#include "RecoTracker/MeasurementDet/interface/MeasurementTracker.h"
+#include "RecoTracker/MeasurementDet/interface/MeasurementTrackerEvent.h"
+#include "RecoTracker/Record/interface/CkfComponentsRecord.h"
+#include "RecoTracker/Record/interface/NavigationSchoolRecord.h"
+#include "RecoTracker/TkDetLayers/interface/GeometricSearchTracker.h"
+#include "TrackPropagation/RungeKutta/interface/defaultRKPropagator.h"
+#include "TrackingTools/DetLayers/interface/NavigationSchool.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalPropagator.h"
+#include "TrackingTools/KalmanUpdators/interface/Chi2MeasurementEstimator.h"
+#include "TrackingTools/KalmanUpdators/interface/KFUpdator.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+#include "TrackingTools/TransientTrack/interface/GsfTransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TrackTransientTrack.h"
+
+#include "DataFormats/GeometrySurface/interface/RectangularPlaneBounds.h"
+#include "DataFormats/GeometrySurface/interface/TrapezoidalPlaneBounds.h"
+
+#include "DataFormats/GeometryCommonDetAlgo/interface/ErrorFrameTransformer.h"
+
+#include "TLorentzVector.h"
+
 //
 // class declaration
 //
@@ -81,6 +124,11 @@ class MuonVertexProducer : public edm::stream::EDProducer<> {
       const double ptMin_,dlenMin_,dlenSigMin_;
       const edm::EDGetTokenT<std::vector<reco::Vertex>> pvs_;
       const StringCutObjectSelector<reco::Vertex> svCut_;
+
+      // Material veto additions
+      edm::EDGetToken measurementTrackerEventToken_;
+      const edm::ESGetToken<MeasurementTracker, CkfComponentsRecord> measurementTrackerToken_;
+      bool pass_material_veto(const GeomDet *det, Local3DPoint point);
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -111,8 +159,12 @@ MuonVertexProducer::MuonVertexProducer(const edm::ParameterSet& iConfig):
     dlenMin_(iConfig.getParameter<double>("dlenMin") ),
     dlenSigMin_(iConfig.getParameter<double>("dlenSigMin") ),
     pvs_(consumes<std::vector<reco::Vertex>>( iConfig.getParameter<edm::InputTag>("pvSrc") )),
-    svCut_(iConfig.getParameter<std::string>("svCut") , true)
+    svCut_(iConfig.getParameter<std::string>("svCut") , true),
+    measurementTrackerEventToken_(consumes<MeasurementTrackerEvent>(iConfig.getParameter<edm::InputTag>("measurementTrackerEventInputTag"))),
+    measurementTrackerToken_(esConsumes())
 {
+   //measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>(iConfig.getParameter<edm::InputTag>("measurementTrackerEventInputTag"));
+   //measurementTrackerToken_ = esConsumes();
    produces<std::vector<reco::Vertex>>();
    produces<nanoaod::FlatTable>("svs");
 }
@@ -131,6 +183,60 @@ MuonVertexProducer::~MuonVertexProducer()
 // member functions
 //
 
+bool MuonVertexProducer::pass_material_veto(const GeomDet *det, Local3DPoint point){
+
+  float xy[4][2];
+  float dz;
+  const Bounds *b = &((det->surface()).bounds());
+
+
+  if (const TrapezoidalPlaneBounds *b2 = dynamic_cast<const TrapezoidalPlaneBounds *>(b)) {
+    // See sec. "TrapezoidalPlaneBounds parameters" in doc/reco-geom-notes.txt
+    std::array<const float, 4> const &par = b2->parameters();
+    xy[0][0] = -par[0];
+    xy[0][1] = -par[3];
+    xy[1][0] = -par[1];
+    xy[1][1] = par[3];
+    xy[2][0] = par[1];
+    xy[2][1] = par[3];
+    xy[3][0] = par[0];
+    xy[3][1] = -par[3];
+    dz = par[2];
+  } else if (const RectangularPlaneBounds *b2 = dynamic_cast<const RectangularPlaneBounds *>(b)) {
+    // Rectangular
+    float dx = b2->width() * 0.5;   // half width
+    float dy = b2->length() * 0.5;  // half length
+    xy[0][0] = -dx;
+    xy[0][1] = -dy;
+    xy[1][0] = -dx;
+    xy[1][1] = dy;
+    xy[2][0] = dx;
+    xy[2][1] = dy;
+    xy[3][0] = dx;
+    xy[3][1] = -dy;
+    dz = b2->thickness() * 0.5;  // half thickness
+  }
+  for (int i = 0; i < 4; ++i) {
+    Local3DPoint lp1(xy[i][0], xy[i][1], -dz);
+    Local3DPoint lp2(xy[i][0], xy[i][1], dz);
+
+    if (
+        (
+            (fabs((point - lp1).x()) < 0.81) &&
+            (fabs((point - lp1).y()) < 3.24) &&
+            (fabs((point - lp1).z()) < 0.0145)
+        ) ||
+        (
+            (fabs((point - lp2).x()) < 0.81) &&
+            (fabs((point - lp2).y()) < 3.24) &&
+            (fabs((point - lp2).z()) < 0.0145)
+        )
+    )
+        return false;
+ }
+ return true;
+}
+
 // ------------ method called to produce the data  ------------
 void
 MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -145,8 +251,18 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     edm::Handle<std::vector<reco::Vertex>> pvsIn;
     iEvent.getByToken(pvs_, pvsIn);
 
+    edm::Handle<MeasurementTrackerEvent> trackerMeas;
+    iEvent.getByToken(measurementTrackerEventToken_, trackerMeas);
+
+    //edm::ESHandle<MeasurementTracker> measurementTrackerHandle;
+    //iSetup.get<CkfComponentsRecord>().get(measurementTrackerHandle);
+    //measurementTrackerHandle = iSetup.getHandle(measurementTrackerEventToken_);
+    //iSetup.getByToken(measurementTrackerHandle, measurementTrackerEventToken_)
+    edm::ESHandle<MeasurementTracker> measurementTrackerHandle = iSetup.getHandle(measurementTrackerToken_);
+    auto const& searchGeom = *(*measurementTrackerHandle).geometricSearchTracker();
+
     std::vector<float> dlen,dlenSig,pAngle,dxy,dxySig,x,y,z,ndof,chi2,origMass,propMass,mu1pt,mu2pt,mu1phi,mu2phi,mu1eta,mu2eta;
-    std::vector<int> mu1index,mu2index,charge;
+    std::vector<int> mu1index,mu2index,charge,material;
     VertexDistance3D vdist;
     VertexDistanceXY vdistXY;
 
@@ -211,6 +327,38 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                     if (svCut_(vertex)) {
                         Measurement1D dl= vdist.distance(PV0,VertexState(RecoVertex::convertPos(vertex.position()),RecoVertex::convertError(vertex.error())));
                         if(dl.value() > dlenMin_ and dl.significance() > dlenSigMin_){
+                            // check material veto
+                            bool passes_material_veto = true;
+                            GlobalPoint myPoint(vertex.x(), vertex.y(), vertex.z());
+                            GlobalError myErr(vertex.xError(), 0, vertex.yError(), 0, 0, vertex.zError()); // cov missing
+
+                            for (auto const& detL : searchGeom.allLayers()) {
+                                auto const& components = detL->basicComponents();
+                                for (auto const& comp: components){
+                                    if(!comp->isLeaf()){
+                                        for (auto const& subcomp: comp->components()){
+                                            Local3DPoint localPoint = subcomp->surface().toLocal(myPoint);
+                                            LocalError localErr = ErrorFrameTransformer().transform(myErr, subcomp->surface());
+                                            bool vertex_onmodule_withinunc = subcomp->surface().bounds().inside(localPoint, localErr);
+                                            passes_material_veto = pass_material_veto(subcomp, localPoint) and not vertex_onmodule_withinunc;
+                                            if (!passes_material_veto)
+                                                break;
+                                        }
+                                    }
+                                    else {
+                                        Local3DPoint localPoint = comp->surface().toLocal(myPoint);
+                                        LocalError localErr = ErrorFrameTransformer().transform(myErr, comp->surface());
+                                        bool vertex_onmodule_withinunc = comp->surface().bounds().inside(localPoint, localErr);
+                                        passes_material_veto = pass_material_veto(comp, localPoint) and not vertex_onmodule_withinunc;
+                                    }
+                                    if (!passes_material_veto)
+                                        break;
+                                }
+                                if (!passes_material_veto)
+                                    break;
+                            }
+
+
                             double dx = (-PV0.x() + vertex.x()), dy = (-PV0.y() + vertex.y()), dz = (-PV0.z() + vertex.z());
                             double pmag = sqrt(vertex.p4(muonMass).px()*vertex.p4(muonMass).px()+vertex.p4(muonMass).py()*vertex.p4(muonMass).py()+vertex.p4(muonMass).pz()*vertex.p4(muonMass).pz());
                             double pdotv = (dx * vertex.p4(muonMass).px() + dy*vertex.p4(muonMass).py() + dz*vertex.p4(muonMass).pz())/(pmag*sqrt(dx*dx + dy*dy + dz*dz));
@@ -254,6 +402,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                             mu1index.push_back(origIndex[i]);
                             mu2index.push_back(origIndex[j]);
                             charge.push_back(muObjs[i].charge() + muObjs[j].charge());
+                            material.push_back((int) passes_material_veto);
                             // std::cout << muObjs[i]->pt() << " " << muons->at(mu1index[-1])->pt() << std::endl;
                             nGoodSV++;
                         }
@@ -286,6 +435,7 @@ MuonVertexProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     svsTable->addColumn<int>("mu1index",mu1index,  "lead muon index for vertex");
     svsTable->addColumn<int>("mu2index",mu2index,  "second muon index for vertex");
     svsTable->addColumn<int>("charge",charge,  "vertex charge");
+    svsTable->addColumn<int>("material_veto", material, "vertex passes material veto");
 
 
     iEvent.put(std::move(vertices));
