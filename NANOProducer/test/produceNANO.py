@@ -69,7 +69,7 @@ if options.isData:
     elif options.year == '2022':
         process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
     elif (options.year == '2023'):
-        process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
+        process = cms.Process('NANO',eras.Run3_2023,eras.run3_nanoAOD_124)
     else:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
@@ -81,10 +81,10 @@ else:
     elif options.year == '2018' or options.year == '2018D' or options.year == "2018UL":
         #process = cms.Process('NANO',eras.Run2_2018)
         process = cms.Process('NANO',eras.Run2_2018,eras.run2_nanoAOD_106Xv2)
-    elif options.year == '2022':
+    elif '2022' in options.year:
         process = cms.Process('NANO',eras.Run3)
-    elif (options.year == '2023'):
-        process = cms.Process('NANO',eras.Run3)
+    elif '2023' in options.year:
+        process = cms.Process('NANO',eras.Run3_2023)
     else:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 
@@ -208,9 +208,9 @@ if options.isData:
     elif options.year == '2018UL':
         process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '')
     elif options.year == '2022':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2', '')
     elif options.year == '2023':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_v1', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
 else:
     if options.year == '2016':
@@ -219,10 +219,16 @@ else:
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mc2017_realistic_v8', '')
     elif options.year == '2018' or options.year == '2018D' or options.year == "2018UL":
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
-    elif options.year == '2022':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2022_realistic_postEE_v1', '')
-    elif options.year == '2023':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2023_realistic_postBPix_v1', '')
+    elif options.year == '2022preEE':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2022_realistic_v5', '')
+    elif options.year == '2022postEE':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2022_realistic_postEE_v5', '')
+    elif options.year == '2023preBPix':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2023_realistic_v13', '')
+    elif options.year == '2023postBPix':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2023_realistic_postBPix_v1', '')
+    else:
+        raise ValueError("Only 2016, 2017, 2018, 2022preEE, 2022postEE, 2023preBPix, 2023postBPix are allowed.")
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None')
 
 # ------------------------------------------------------------------------
@@ -512,10 +518,6 @@ process.muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 for p in Path:
     setattr(process.muonBParkTable.variables, "fired_%s" % p, Var("userInt('%s')" % p, int, doc="reco muon fired this trigger"))
 
-trigobjpaths = ["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
-if options.year in ['2022', '2023']:
-    trigobjpaths = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
-
 #Introduce trigger muons without any L1 selections
 process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
     bits = cms.InputTag("TriggerResults","","HLT"),
@@ -523,7 +525,7 @@ process.triggerMuonTable = cms.EDProducer("TriggerObjectProducer",
     name= cms.string("TriggerObject"),
     ptMin = cms.double(0.5),
     objId = cms.int32(83),
-    HLTPaths = cms.vstring(trigobjpaths)
+    HLTPaths = cms.vstring(Path)
     
 )
 
