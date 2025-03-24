@@ -48,6 +48,13 @@
 <use name="RecoVertex/KinematicFitPrimitives"/>
 <use name="RecoVertex/KinematicFit"/>
 <use name="MagneticField/Records"/>
+<use name="RecoLocalTracker/Records"/>
+<use name="RecoLocalTracker/SiPixelRecHits"/>
+<use name="RecoLocalTracker/SiStripRecHitConverter"/>
+<use name="RecoTracker/Record"/>
+<use name="RecoTracker/MeasurementDet"/>
+<use name="RecoTracker/TkDetLayers"/>
+<use name="RecoTracker/TransientTrackingRecHit"/>
 <use name="TrackingTools/Records"/>
 <use name="TrackingTools/IPTools"/>
 <use name="TrackingTools/GsfTracking"/>
@@ -100,7 +107,6 @@
 <library file="FourMuonVertexProducer.cc" name="FourMuonVertexProducerPlugin">
     <flags EDM_PLUGIN="1"/>
 </library>
-
 
 <!--flags CXXFLAGS="-g"
 <library   file="*.cc" name="PhysicsToolsBParkingNanoPlugins">
