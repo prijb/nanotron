@@ -449,7 +449,7 @@ process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
 #Trigger matching (only for offline)
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
-if options.year in ['2022', '2023']:
+if options.year in ['2022', '2023', '2022preEE']:
     Path = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
@@ -699,7 +699,7 @@ for moduleName in modulesToRemove:
 process.genParticleTable.variables.vertex_x = Var("vertex().x()", float, doc="vertex x position")
 process.genParticleTable.variables.vertex_y = Var("vertex().y()", float, doc="vertex y position")
 process.genParticleTable.variables.vertex_z = Var("vertex().z()", float, doc="vertex z position")
-
+process.finalMuons.cut = cms.string("")
 # ------------------------------------------------------------------------
 # Golden lumisection JSON
 
