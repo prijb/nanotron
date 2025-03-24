@@ -449,7 +449,7 @@ process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
 #Trigger matching (only for offline)
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
-if options.year in ['2022', '2023', '2022preEE']:
+if options.year in ['2022', '2023', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix', '2024']:
     Path = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
