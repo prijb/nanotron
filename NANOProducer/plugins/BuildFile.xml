@@ -8,6 +8,7 @@
 
 <use name="SimGeneral/HepPDTRecord"/>
 <use name="SimDataFormats/GeneratorProducts"/>
+<use name="SimDataFormats/PileupSummaryInfo"/>
 
 <use name="GeneratorInterface/Core"/>
 
@@ -98,6 +99,10 @@
 </library>
 
 <library file="FourMuonVertexProducer.cc" name="FourMuonVertexProducerPlugin">
+    <flags EDM_PLUGIN="1"/>
+</library>
+
+<library file="PileupPtHatTableProducer.cc" name="PileupPtHatTableProducerPlugin">
     <flags EDM_PLUGIN="1"/>
 </library>
 

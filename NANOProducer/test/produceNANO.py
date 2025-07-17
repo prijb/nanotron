@@ -77,6 +77,8 @@ if options.isData:
         process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_122)
     elif (options.year == '2023'):
         process = cms.Process('NANO',eras.Run3,eras.run3_nanoAOD_124)
+    elif (options.year == '2024'):
+        process = cms.Process('NANO',eras.Run3)
     else:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
 else:
@@ -89,6 +91,8 @@ else:
     elif options.year == '2022':
         process = cms.Process('NANO',eras.Run3)
     elif (options.year == '2023'):
+        process = cms.Process('NANO',eras.Run3)
+    elif (options.year == '2024'):
         process = cms.Process('NANO',eras.Run3)
     else:
         process = cms.Process('NANO',eras.Run2_2016,eras.run2_nanoAOD_94X2016)
@@ -221,6 +225,8 @@ if options.isData:
         process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10', '')
     elif options.year == '2023':
         process.GlobalTag = GlobalTag(process.GlobalTag, '132X_dataRun3_v1', '')
+    elif options.year == '2024':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v2', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
 else:
     if options.year == '2016':
@@ -233,6 +239,8 @@ else:
         process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2022_realistic_postEE_v1', '')
     elif options.year == '2023':
         process.GlobalTag = GlobalTag(process.GlobalTag, '132X_mcRun3_2023_realistic_postBPix_v1', '')
+    elif options.year == '2024':
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2024_realistic_v26', '')
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None')
 
 # ------------------------------------------------------------------------
@@ -246,6 +254,16 @@ process.load('nanotron.Scouting.scoutingjet_cff')
 process.load('nanotron.Scouting.scoutingmuon_cff')
 process.load('nanotron.Scouting.scoutingvertices_cff')
 process.load('nanotron.Scouting.scoutingglobal_cff')
+
+# Modify the muon sources to be hltScoutingMuonPackerNoVtx instead of hltScoutingMuonPacker for 2024
+if options.year == '2024':
+    process.run3ScoutingMuonRecoTrack.muonSource = cms.InputTag("hltScoutingMuonPackerNoVtx")
+    process.run3ScoutingMuonToPatMuon.muonSource = cms.InputTag("hltScoutingMuonPackerNoVtx")
+
+    process.run3ScoutingVertices.svSource = cms.InputTag("hltScoutingMuonPackerNoVtx", "displacedVtx")
+    process.run3ScoutingVertices.muonSource = cms.InputTag("hltScoutingMuonPackerNoVtx")
+    process.svScoutingTable.svSource = cms.InputTag("hltScoutingMuonPackerNoVtx", "displacedVtx")
+    
 
 #Get GT digis
 process.load("EventFilter.L1TRawToDigi.gtStage2Digis_cfi")
@@ -307,9 +325,23 @@ if options.format == 'AOD':
     process.load("Configuration.StandardSequences.PAT_cff")
     process.patSequence = cms.Sequence(process.patTask)
     process.mcSequence = cms.Sequence(process.patSequence + process.prunedGenParticles + process.finalGenParticles + process.genParticleTable + process.muonsMCMatchForTable + process.muonMCTable)
+    
+    # Convert "addPileupInfo" to "slimmedAddPileupInfo" for AODSIM
+    process.load("PhysicsTools.PatAlgos.slimming.slimmedAddPileupInfo_cfi")
+    process.mcSequence += cms.Sequence(process.slimmedAddPileupInfo)
 
 else:    
     process.mcSequence = cms.Sequence(process.finalGenParticles + process.genParticleTable + process.muonsMCMatchForTable + process.muonMCTable)
+
+# Extra additions to MC sequence
+from PhysicsTools.NanoAOD.globals_cff import puTable, genTable
+#process.mcSequence += cms.Sequence(puTable + genTable)
+process.mcSequence += cms.Sequence(genTable)
+process.pileupPtHatTable = cms.EDProducer("PileupPtHatTableProducer",
+    src = cms.InputTag("slimmedAddPileupInfo"),
+)
+process.mcSequence += cms.Sequence(process.pileupPtHatTable)
+
 
 process.muonVerticesTable = cms.EDProducer("MuonVertexProducer",
     srcMuon = cms.InputTag("run3ScoutingMuonToPatMuon"),
