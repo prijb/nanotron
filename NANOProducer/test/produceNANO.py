@@ -212,11 +212,11 @@ if options.isData:
     elif options.year == '2018UL':
         process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '')
     elif '2022' in options.year:
-        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_v3', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_v14', '')
     elif '2023' in options.year:
-        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_v3', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_v14', '')
     elif '2024' in options.year:
-        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_v3', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_v14', '')
     else:
         raise ValueError("Only 2016, 2017, 2018, 2022preEE, 2022postEE, 2023preBPix, 2023postBPix, 2024 are allowed.")
     jetCorrectionsAK4PFchs = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual'], 'None')
@@ -228,13 +228,13 @@ else:
     elif options.year == '2018' or options.year == '2018D' or options.year == "2018UL":
         process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v21', '')
     elif options.year == '2022preEE':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2022_realistic_v3', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2022_realistic_v9', '')
     elif options.year == '2022postEE':
         process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2022_realistic_postEE_v3', '')
     elif options.year == '2023preBPix':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2023_realistic_v3', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2023_realistic_v6', '')
     elif options.year == '2023postBPix':
-        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2023_realistic_postBPix_v3', '')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2023_realistic_postBPix_v26', '')
     elif options.year == '2024':
         process.GlobalTag = GlobalTag(process.GlobalTag, '140X_mcRun3_2024_realistic_v10', '')
     else:
@@ -449,8 +449,120 @@ process.fourmuonVerticesTable = cms.EDProducer("FourMuonVertexProducer",
 #Trigger matching (only for offline)
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
-if options.year in ['2022', '2023', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix', '2024']:
-    Path = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
+#if options.year in ['2022', '2023', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix', '2024']:
+#    Path = ['HLT_DoubleMu4_3_LowMass', 'HLT_DoubleMu4_LowMass_Displaced', 'HLT_Dimuon10_Upsilon_y1p4']
+
+# Individually define unprescaled HLT paths
+if "2022" in options.year:
+    Path = [
+        "HLT_DoubleMu4_3_Bs",
+        "HLT_Dimuon14_Phi_Barrel_Seagulls",
+        "HLT_Dimuon18_PsiPrime",
+        "HLT_Dimuon25_Jpsi",
+        "HLT_Trimuon5_3p5_2_Upsilon_Muon",
+        "HLT_Mu25_TkMu0_Phi",
+        "HLT_Dimuon0_Jpsi3p5_Muon2",
+        "HLT_DoubleMu4_JpsiTrkTrk_Displaced",
+        "HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15",
+        "HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1",
+        "HLT_Dimuon18_PsiPrime_noCorrL1",
+        "HLT_Dimuon24_Upsilon_noCorrL1",
+        "HLT_Dimuon24_Phi_noCorrL1",
+        "HLT_Dimuon25_Jpsi_noCorrL1",
+        "HLT_DoubleMu5_Upsilon_DoubleEle3_CaloIdL_TrackIdL",
+        "HLT_DoubleMu3_DoubleEle7p5_CaloIdL_TrackIdL_Upsilon",
+        "HLT_TrimuonOpen_5_3p5_2_Upsilon_Muon",
+        "HLT_DoubleMu3_TkMu_DsTau3Mu",
+        "HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05",
+        "HLT_Dimuon12_Upsilon_y1p4",
+        "HLT_Mu30_TkMu0_Psi",
+        "HLT_Mu30_TkMu0_Upsilon",
+        "HLT_DoubleMu4_3_LowMass",
+        "HLT_DoubleMu4_LowMass_Displaced",
+        "HLT_DoubleMu4_MuMuTrk_Displaced",
+        "HLT_DoubleMu4_3_Photon4_BsToMMG",
+        "HLT_DoubleMu4_3_Displaced_Photon4_BsToMMG",
+        "HLT_DoubleMu4_JpsiTrk_Bc",
+        "HLT_Dimuon10_Upsilon_y1p4",
+        "HLT_Dimuon14_PsiPrime",
+        "HLT_Dimuon14_PsiPrime_noCorrL1"
+    ]
+
+elif "2023" in options.year:
+    Path = [
+        "HLT_DoubleMu4_3_Bs",
+        "HLT_Dimuon14_Phi_Barrel_Seagulls",
+        "HLT_Dimuon18_PsiPrime",
+        "HLT_Dimuon25_Jpsi",
+        "HLT_Trimuon5_3p5_2_Upsilon_Muon",
+        "HLT_Mu25_TkMu0_Phi",
+        "HLT_Dimuon0_Jpsi3p5_Muon2",
+        "HLT_DoubleMu4_JpsiTrkTrk_Displaced",
+        "HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15",
+        "HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1",
+        "HLT_Dimuon18_PsiPrime_noCorrL1",
+        "HLT_Dimuon24_Upsilon_noCorrL1",
+        "HLT_Dimuon24_Phi_noCorrL1",
+        "HLT_Dimuon25_Jpsi_noCorrL1",
+        "HLT_TrimuonOpen_5_3p5_2_Upsilon_Muon",
+        "HLT_DoubleMu3_TkMu_DsTau3Mu",
+        "HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05",
+        "HLT_Dimuon12_Upsilon_y1p4",
+        "HLT_Mu30_TkMu0_Psi",
+        "HLT_Mu30_TkMu0_Upsilon",
+        "HLT_DoubleMu4_3_LowMass",
+        "HLT_DoubleMu4_LowMass_Displaced",
+        "HLT_DoubleMu4_MuMuTrk_Displaced",
+        "HLT_DoubleMu4_3_Photon4_BsToMMG",
+        "HLT_DoubleMu4_3_Displaced_Photon4_BsToMMG",
+        "HLT_DoubleMu4_JpsiTrk_Bc",
+        "HLT_Dimuon10_Upsilon_y1p4",
+        "HLT_Dimuon14_PsiPrime",
+        "HLT_Dimuon14_PsiPrime_noCorrL1",
+        "HLT_DoubleMu5_Upsilon_DoubleEle3_CaloIdL_TrackIdL",
+        "HLT_DoubleMu3_DoubleEle7p5_CaloIdL_TrackIdL_Upsilon"
+    ]
+
+elif "2024" in options.year:
+    Path = [
+        "HLT_DoubleMu4_3_Bs",
+        "HLT_Dimuon14_Phi_Barrel_Seagulls",
+        "HLT_Dimuon18_PsiPrime",
+        "HLT_Dimuon25_Jpsi",
+        "HLT_Trimuon5_3p5_2_Upsilon_Muon",
+        "HLT_Mu25_TkMu0_Phi",
+        "HLT_Dimuon0_Jpsi3p5_Muon2",
+        "HLT_DoubleMu4_JpsiTrkTrk_Displaced",
+        "HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15",
+        "HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1",
+        "HLT_Dimuon18_PsiPrime_noCorrL1",
+        "HLT_Dimuon24_Upsilon_noCorrL1",
+        "HLT_Dimuon24_Phi_noCorrL1",
+        "HLT_Dimuon25_Jpsi_noCorrL1",
+        "HLT_TrimuonOpen_5_3p5_2_Upsilon_Muon",
+        "HLT_DoubleMu3_TkMu_DsTau3Mu",
+        "HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05",
+        "HLT_Dimuon12_Upsilon_y1p4",
+        "HLT_Mu30_TkMu0_Psi",
+        "HLT_Mu30_TkMu0_Upsilon",
+        "HLT_DoubleMu4_3_LowMass",
+        "HLT_DoubleMu4_LowMass_Displaced",
+        "HLT_DoubleMu4_MuMuTrk_Displaced",
+        "HLT_DoubleMu4_3_Photon4_BsToMMG",
+        "HLT_DoubleMu4_3_Displaced_Photon4_BsToMMG",
+        "HLT_DoubleMu4_JpsiTrk_Bc",
+        "HLT_Dimuon10_Upsilon_y1p4",
+        "HLT_Dimuon14_PsiPrime",
+        "HLT_Dimuon14_PsiPrime_noCorrL1",
+        "HLT_DoubleMu2_Jpsi_LowPt",
+        "HLT_DoubleMu5_Upsilon_DoubleEle3_CaloIdL_TrackIdL",
+        "HLT_DoubleMu3_DoubleEle7p5_CaloIdL_TrackIdL_Upsilon",
+        "HLT_Mu10_Barrel_L1HP11_IP6",
+        "HLT_Mu9_Barrel_L1HP10_IP6",
+        "HLT_Mu8_Barrel_L1HP9_IP6",
+        "HLT_Mu7_Barrel_L1HP8_IP6",
+        "HLT_Mu6_Barrel_L1HP7_IP6"
+    ]
 
 process.muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                             #muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD    
