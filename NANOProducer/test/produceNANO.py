@@ -811,7 +811,7 @@ for moduleName in modulesToRemove:
 process.genParticleTable.variables.vertex_x = Var("vertex().x()", float, doc="vertex x position")
 process.genParticleTable.variables.vertex_y = Var("vertex().y()", float, doc="vertex y position")
 process.genParticleTable.variables.vertex_z = Var("vertex().z()", float, doc="vertex z position")
-process.finalMuons.cut = cms.string("")
+#process.finalMuons.cut = cms.string("")
 # ------------------------------------------------------------------------
 # Golden lumisection JSON
 
